@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100%" height="100%">
+  <defs>
+    <linearGradient id="sublivra-grad" x1="0%" y1="100%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#8B5CF6" />
+      <stop offset="50%" stop-color="#6366F1" />
+      <stop offset="100%" stop-color="#06B6D4" />
+    </linearGradient>
+    <linearGradient id="sublivra-glow" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#D0BCFF" />
+      <stop offset="100%" stop-color="#4CD7F6" />
+    </linearGradient>
+  </defs>
+  
+  <!-- Outer Smooth Geometric Diamond Contour -->
+  <rect x="8" y="8" width="84" height="84" rx="24" fill="#121318" stroke="url(#sublivra-grad)" stroke-width="2" />
+  
+  <!-- Inner Dynamic Frequency / Infinity Monogram -->
+  <g fill="none" stroke-linecap="round" stroke-linejoin="round">
+    <!-- Main Harmonic Sine Wave (Thick Vibrant Gradient) -->
+    <path d="M 24 50 C 32 28, 42 28, 50 50 C 58 72, 68 72, 76 50" stroke="url(#sublivra-grad)" stroke-width="6.5" />
+    
+    <!-- Ascending Subconscious Consciousness Loop (Upper Arc) -->
+    <path d="M 34 38 C 42 24, 58 24, 66 38 C 72 48, 62 64, 50 64 C 38 64, 28 48, 34 38 Z" stroke="url(#sublivra-glow)" stroke-width="3" stroke-dasharray="0.5 0" opacity="0.9" />
+    
+    <!-- Central Resonant Frequency Core -->
+    <circle cx="50" cy="50" r="4.5" fill="url(#sublivra-glow)" />
+    
+    <!-- Vertical Subtle Sound Resonance Lines -->
+    <line x1="20" y1="42" x2="20" y2="58" stroke="url(#sublivra-grad)" stroke-width="2.5" opacity="0.6" />
+    <line x1="80" y1="42" x2="80" y2="58" stroke="url(#sublivra-grad)" stroke-width="2.5" opacity="0.6" />
+  </g>
+</svg>

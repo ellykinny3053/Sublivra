@@ -1,0 +1,1038 @@
+<!DOCTYPE html>
+<html class="dark" lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sublivra Studio — Subliminal & Neural Affirmation Studio</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
+    rel="stylesheet">
+  <link rel="stylesheet" href="/static/css/variables.css?v=10.0">
+  <link rel="stylesheet" href="/static/css/base.css?v=10.0">
+  <link rel="stylesheet" href="/static/css/components.css?v=10.0">
+</head>
+
+<body>
+
+  <div class="app-container">
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <div class="brand-logo" style="display: flex; align-items: center; gap: 14px; padding: 0 8px 24px;">
+        <img src="/static/assets/logo.png?v=2.0" alt="Sublivra Logo"
+          style="width: 48px; height: 38px; object-fit: contain; filter: drop-shadow(0 0 10px rgba(208, 188, 255, 0.45));">
+        <div>
+          <h1 class="brand-title"
+            style="font-size: 1.35rem; font-weight: 800; line-height: 1.1; letter-spacing: -0.5px;">Sublivra</h1>
+          <p style="font-family: var(--font-mono); font-size: 0.72rem; color: var(--text-muted); margin-top: 2px;"></p>
+        </div>
+      </div>
+
+      <div class="nav-section-title">Studio Workspaces</div>
+      <ul class="nav-links">
+        <li class="nav-item active">
+          <button data-tab="library" id="nav-library">
+            <span class="material-symbols-outlined" style="font-size: 20px;">library_music</span>
+            Audio Library
+          </button>
+        </li>
+        <li class="nav-item">
+          <button data-tab="tts" id="nav-tts">
+            <span class="material-symbols-outlined"
+              style="font-size: 20px; color: var(--accent-primary);">auto_awesome</span>
+            Make Your Own Sub
+          </button>
+        </li>
+        <li class="nav-item">
+          <button data-tab="editor" id="nav-editor">
+            <span class="material-symbols-outlined" style="font-size: 20px;">graphic_eq</span>
+            Audio Editor
+          </button>
+        </li>
+        <li class="nav-item">
+          <button data-tab="mixer" id="nav-mixer">
+            <span class="material-symbols-outlined" style="font-size: 20px;">package_2</span>
+            Subliminal Bundles
+          </button>
+        </li>
+        <li class="nav-item">
+          <button data-tab="bundles" id="nav-bundles">
+            <span class="material-symbols-outlined" style="font-size: 20px;">playlist_add</span>
+            Playlist Maker
+          </button>
+        </li>
+      </ul>
+
+      <!-- User Profile Widget -->
+      <div class="user-profile-widget" style="margin-top: auto;">
+        <div class="user-info">
+          <div class="user-avatar" id="user-display-avatar"
+            style="overflow: hidden; border: 1px solid var(--border-glow);">
+            <img src="/static/assets/sphere.png" alt="Avatar" style="width: 100%; height: 100%; object-fit: cover;">
+          </div>
+          <div class="user-details">
+            <span class="user-name" id="user-display-name">Guest User</span>
+            <span class="user-email" id="user-display-email">Sign in to sync</span>
+          </div>
+        </div>
+        <button class="btn-icon" id="logout-btn" title="Sign Out" style="width: 32px; height: 32px;">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+            <polyline points="16 17 21 12 16 7" />
+            <line x1="21" y1="12" x2="9" y2="12" />
+          </svg>
+        </button>
+      </div>
+    </aside>
+
+    <!-- Main Content Area -->
+    <div class="main-wrapper">
+      <!-- Top App Bar -->
+      <header class="top-bar">
+        <div class="page-heading">
+          <h1 id="view-heading-title" style="font-size: 1.35rem; font-weight: 700;">Audio Library</h1>
+          <p id="view-heading-desc" style="font-size: 0.82rem; color: var(--text-muted);">Browse, manage, and play your
+            generated, uploaded, and imported tracks</p>
+        </div>
+
+        <div class="top-bar-actions" style="display: flex; align-items: center; gap: 12px;">
+          <!-- YouTube Import Quick Action -->
+          <button class="btn btn-secondary btn-sm" id="btn-open-yt-modal"
+            style="border-radius: var(--radius-full); padding: 7px 14px;">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="#ef4444">
+              <polygon points="5 3 19 12 5 21 5 3" />
+            </svg>
+            YouTube Import
+          </button>
+
+          <!-- Upload Audio Button -->
+          <button class="btn btn-secondary btn-sm" id="btn-open-upload"
+            style="border-radius: var(--radius-full); padding: 7px 14px;">
+            <span class="material-symbols-outlined" style="font-size: 16px;">cloud_upload</span>
+            Upload Audio
+          </button>
+
+          <!-- Dark / Light Edition Toggle Button -->
+          <button type="button" class="btn-icon btn-theme-toggle" title="Toggle Dark / Light Edition"
+            style="border-radius: var(--radius-full); width: 36px; height: 36px;">
+            <span class="material-symbols-outlined theme-toggle-icon"
+              style="font-size: 19px; color: var(--accent-primary);">light_mode</span>
+          </button>
+
+          <button id="header-auth-btn" class="btn btn-primary btn-sm"
+            style="border-radius: var(--radius-full); padding: 7px 16px;">
+            Sign In / Register
+          </button>
+        </div>
+      </header>
+
+      <!-- Content Views -->
+      <div class="content-viewport">
+
+        <!-- TAB 1: Library -->
+        <section class="tab-pane active" id="tab-library">
+          <div style="display: flex; gap: 16px; margin-bottom: 24px;">
+            <div style="flex: 1;">
+              <input type="text" id="library-search" class="form-input" placeholder="Search tracks by title...">
+            </div>
+            <div style="width: 200px;">
+              <select id="library-filter-source" class="form-select">
+                <option value="">All Sources</option>
+                <option value="tts">TTS Affirmations</option>
+                <option value="upload">Uploads</option>
+                <option value="youtube_authorized">YouTube</option>
+                <option value="edited">Edited</option>
+                <option value="mixed">Mixed</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="tracks-grid" id="tracks-container">
+            <!-- Dynamically populated -->
+          </div>
+        </section>
+
+        <!-- TAB 2: Make Your Own Sub (Subliminal Creator Studio) -->
+        <section class="tab-pane" id="tab-tts">
+          <div style="max-width: 1080px; margin: 0 auto; display: flex; flex-direction: column; gap: 24px;">
+
+            <!-- STEP 1: Background Music / Ambient Track -->
+            <div class="glass-card" style="border-left: 4px solid var(--accent-primary); padding: 24px;">
+              <div
+                style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; flex-wrap: wrap; gap: 10px;">
+                <div>
+                  <div style="display: flex; align-items: center; gap: 10px;">
+                    <span
+                      style="background: var(--accent-gradient); color: white; border-radius: 50%; width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.88rem;">1</span>
+                    <h3 style="font-size: 1.25rem; font-weight: 700;">Add Background Audio (Music, Rain, Frequencies)
+                    </h3>
+                  </div>
+                  <p style="font-size: 0.85rem; color: var(--text-muted); margin-top: 4px;">
+                    Import base music from YouTube, upload from your device, or choose from your library.
+                  </p>
+                </div>
+
+                <!-- Source Selector Tabs -->
+                <div
+                  style="display: flex; gap: 6px; background: rgba(0,0,0,0.3); padding: 4px; border-radius: 8px; border: 1px solid var(--border-subtle);">
+                  <button type="button" class="btn btn-sm mys-bg-tab-btn active" data-target="mys-pane-yt"
+                    style="padding: 6px 12px; font-size: 0.8rem;">
+                    🎬 YouTube Import
+                  </button>
+                  <button type="button" class="btn btn-sm mys-bg-tab-btn" data-target="mys-pane-upload"
+                    style="padding: 6px 12px; font-size: 0.8rem;">
+                    📁 Device Upload
+                  </button>
+                  <button type="button" class="btn btn-sm mys-bg-tab-btn" data-target="mys-pane-library"
+                    style="padding: 6px 12px; font-size: 0.8rem;" onclick="window.tts.populateLibraryDropdown()">
+                    📚 Library Track
+                  </button>
+                </div>
+              </div>
+
+              <!-- Source Pane 1: YouTube Video to Audio -->
+              <div class="mys-bg-pane" id="mys-pane-yt" style="display: block;">
+                <div style="display: grid; grid-template-columns: 1fr auto; gap: 12px; align-items: center;">
+                  <input type="url" id="mys-yt-url" class="form-input"
+                    placeholder="Paste YouTube Link (e.g. https://www.youtube.com/watch?v=... 528Hz music, rain sound)">
+                  <button type="button" id="mys-yt-import-btn" class="btn btn-primary"
+                    style="white-space: nowrap; height: 44px; padding: 0 20px;">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                      <polygon points="5 3 19 12 5 21 5 3" />
+                    </svg>
+                    Import YouTube Audio
+                  </button>
+                </div>
+                <div style="display: flex; align-items: center; gap: 8px; margin-top: 10px;">
+                  <input type="checkbox" id="mys-yt-consent" checked
+                    style="accent-color: var(--accent-primary); width: 16px; height: 16px;">
+                  <label for="mys-yt-consent" style="font-size: 0.78rem; color: var(--text-muted); cursor: pointer;">
+                    I confirm I own or have permission/rights to download and process this audio on Sublivra.
+                  </label>
+                </div>
+              </div>
+
+              <!-- Source Pane 2: Device File Upload -->
+              <div class="mys-bg-pane" id="mys-pane-upload" style="display: none;">
+                <div
+                  style="display: flex; align-items: center; gap: 14px; background: rgba(0,0,0,0.2); padding: 14px; border-radius: var(--radius-sm); border: 1px dashed var(--border-glow);">
+                  <input type="file" id="mys-upload-file" accept="audio/*" class="form-input" style="padding: 8px;">
+                  <span style="font-size: 0.8rem; color: var(--text-muted); white-space: nowrap;">Supports MP3, WAV,
+                    FLAC, M4A, OGG</span>
+                </div>
+              </div>
+
+              <!-- Source Pane 3: Library Dropdown -->
+              <div class="mys-bg-pane" id="mys-pane-library" style="display: none;">
+                <select id="mys-library-select" class="form-select">
+                  <option value="">-- Choose Track from Library --</option>
+                </select>
+              </div>
+
+              <!-- Selected Background Track Badge Card -->
+              <div id="mys-bg-selected-card"
+                style="display: none; align-items: center; justify-content: space-between; background: rgba(139, 92, 246, 0.12); border: 1px solid var(--border-glow); border-radius: var(--radius-sm); padding: 12px 18px; margin-top: 16px;">
+                <div style="display: flex; align-items: center; gap: 12px;">
+                  <span style="font-size: 1.4rem;">🎵</span>
+                  <div>
+                    <strong id="mys-bg-selected-title" style="font-size: 0.95rem; color: var(--text-primary);">Track
+                      Title</strong>
+                    <p id="mys-bg-selected-meta"
+                      style="font-size: 0.78rem; color: var(--text-accent); margin-top: 2px;">⏱️ 0:00 • Ready as Base
+                      Layer</p>
+                  </div>
+                </div>
+                <button type="button" class="btn btn-outline btn-sm" onclick="window.tts.removeBackgroundTrack()"
+                  style="color: #ef4444; border-color: rgba(239,68,68,0.3);">
+                  Remove Base Track
+                </button>
+              </div>
+            </div>
+
+            <!-- STEP 2: Affirmations & Neural Voices Studio -->
+            <div class="glass-card" style="border-left: 4px solid var(--accent-secondary); padding: 24px;">
+              <div style="margin-bottom: 16px;">
+                <div style="display: flex; align-items: center; gap: 10px;">
+                  <span
+                    style="background: var(--accent-secondary); color: white; border-radius: 50%; width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.88rem;">2</span>
+                  <h3 style="font-size: 1.25rem; font-weight: 700;">Affirmations & Neural Voices (Male / Female &
+                    Accents)</h3>
+                </div>
+                <p style="font-size: 0.85rem; color: var(--text-muted); margin-top: 4px;">
+                  Write affirmations, select natural neural voices, and speed them up for subliminal subconscious
+                  absorption.
+                </p>
+              </div>
+
+              <!-- Quick Presets -->
+              <div style="margin-bottom: 14px;">
+                <span
+                  style="font-size: 0.78rem; font-weight: 700; color: var(--text-accent); text-transform: uppercase; letter-spacing: 0.5px; display: block; margin-bottom: 8px;">
+                  ⚡ Instant Affirmation Presets:
+                </span>
+                <div style="display: flex; flex-wrap: wrap; gap: 8px;">
+                  <button type="button" class="btn btn-outline btn-sm"
+                    onclick="window.tts.applyPresetAffirmations('wealth')"
+                    style="font-size: 0.78rem; border-radius: 20px;">💎 Wealth & Millions</button>
+                  <button type="button" class="btn btn-outline btn-sm"
+                    onclick="window.tts.applyPresetAffirmations('confidence')"
+                    style="font-size: 0.78rem; border-radius: 20px;">👑 Supreme Confidence</button>
+                  <button type="button" class="btn btn-outline btn-sm"
+                    onclick="window.tts.applyPresetAffirmations('health')"
+                    style="font-size: 0.78rem; border-radius: 20px;">🌿 Deep Health & Healing</button>
+                  <button type="button" class="btn btn-outline btn-sm"
+                    onclick="window.tts.applyPresetAffirmations('glowup')"
+                    style="font-size: 0.78rem; border-radius: 20px;">💖 Glow Up & Magnetism</button>
+                  <button type="button" class="btn btn-outline btn-sm"
+                    onclick="window.tts.applyPresetAffirmations('focus')"
+                    style="font-size: 0.78rem; border-radius: 20px;">🧠 Laser Focus & Memory</button>
+                  <button type="button" class="btn btn-outline btn-sm"
+                    onclick="window.tts.applyPresetAffirmations('calm')"
+                    style="font-size: 0.78rem; border-radius: 20px;">🌙 Anxiety Release</button>
+                </div>
+              </div>
+
+              <form id="mys-affirmation-form">
+                <div class="form-group">
+                  <label class="form-label">Affirmation Text Statements</label>
+                  <textarea id="mys-aff-text" class="form-textarea" rows="4"
+                    placeholder="Write your powerful 'I am' affirmations here... (e.g. I attract limitless wealth, vibrant health, and unconditional love effortlessly.)"
+                    required></textarea>
+                </div>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px;">
+                  <!-- Neural Voice Selector (Male / Female & Accents) -->
+                  <div class="form-group" style="margin-bottom: 0;">
+                    <label class="form-label">Neural Voice (Male / Female & Accents)</label>
+                    <select id="mys-voice-select" class="form-select" style="font-weight: 500;">
+                      <option value="en-US-JennyNeural" data-lang="en">🇺🇸 US English • Jenny (Female)</option>
+                      <option value="en-US-ChristopherNeural" data-lang="en">🇺🇸 US English • Christopher (Deep Male)
+                      </option>
+                      <option value="en-US-AriaNeural" data-lang="en">🇺🇸 US English • Aria (Warm Female)</option>
+                      <option value="en-US-GuyNeural" data-lang="en">🇺🇸 US English • Guy (Calm Male)</option>
+                      <option value="en-GB-SoniaNeural" data-lang="en">🇬🇧 British English • Sonia (Female)</option>
+                      <option value="en-GB-RyanNeural" data-lang="en">🇬🇧 British English • Ryan (Male)</option>
+                      <option value="en-AU-NatashaNeural" data-lang="en">🇦🇺 Australian • Natasha (Female)</option>
+                      <option value="en-AU-WilliamNeural" data-lang="en">🇦🇺 Australian • William (Male)</option>
+                      <option value="en-IN-NeerjaNeural" data-lang="en">🇮🇳 Indian English • Neerja (Female)</option>
+                      <option value="en-IN-PrabhatNeural" data-lang="en">🇮🇳 Indian English • Prabhat (Male)</option>
+                      <option value="hi-IN-SwaraNeural" data-lang="hi">🇮🇳 Hindi • Swara (Female)</option>
+                      <option value="hi-IN-MadhurNeural" data-lang="hi">🇮🇳 Hindi • Madhur (Male)</option>
+                      <option value="en-CA-ClaraNeural" data-lang="en">🇨🇦 Canadian • Clara (Female)</option>
+                      <option value="en-IE-EmilyNeural" data-lang="en">🇮🇪 Irish • Emily (Female)</option>
+                      <option value="es-ES-ElviraNeural" data-lang="es">🇪🇸 Spanish • Elvira (Female)</option>
+                      <option value="fr-FR-DeniseNeural" data-lang="fr">🇫🇷 French • Denise (Female)</option>
+                      <option value="de-DE-KatjaNeural" data-lang="de">🇩🇪 German • Katja (Female)</option>
+                      <option value="ja-JP-NanamiNeural" data-lang="ja">🇯🇵 Japanese • Nanami (Female)</option>
+                    </select>
+                  </div>
+
+                  <!-- Subliminal Speed Multiplier -->
+                  <div class="form-group" style="margin-bottom: 0;">
+                    <div
+                      style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                      <label class="form-label" style="margin-bottom: 0;">⚡ Subliminal Speedup</label>
+                      <span class="slider-val" id="mys-speed-val"
+                        style="font-weight: 700; color: var(--accent-secondary);">1.0x</span>
+                    </div>
+                    <input type="range" id="mys-speed-slider" min="0.5" max="4.0" step="0.1" value="1.0"
+                      class="custom-range">
+                    <div style="display: flex; justify-content: space-between; margin-top: 6px; gap: 4px;">
+                      <button type="button" class="mys-speed-chip btn btn-outline btn-sm" data-speed="1.0"
+                        style="padding: 2px 6px; font-size: 0.72rem;">1x Normal</button>
+                      <button type="button" class="mys-speed-chip btn btn-outline btn-sm" data-speed="1.5"
+                        style="padding: 2px 6px; font-size: 0.72rem;">1.5x Fast</button>
+                      <button type="button" class="mys-speed-chip btn btn-outline btn-sm" data-speed="2.0"
+                        style="padding: 2px 6px; font-size: 0.72rem;">2x Speed</button>
+                      <button type="button" class="mys-speed-chip btn btn-outline btn-sm" data-speed="3.0"
+                        style="padding: 2px 6px; font-size: 0.72rem;">3x Subliminal</button>
+                      <button type="button" class="mys-speed-chip btn btn-outline btn-sm" data-speed="4.0"
+                        style="padding: 2px 6px; font-size: 0.72rem;">4x Ultra</button>
+                    </div>
+                  </div>
+                </div>
+
+                <button type="submit" id="mys-generate-aff-btn" class="btn btn-secondary"
+                  style="width: 100%; padding: 13px; font-weight: 600;">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                    <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" />
+                    <path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07" />
+                  </svg>
+                  ⚡ Generate Neural Affirmation Audio
+                </button>
+              </form>
+
+              <!-- Generated Affirmations Badge Card -->
+              <div id="mys-aff-generated-card"
+                style="display: none; align-items: center; justify-content: space-between; background: rgba(6, 182, 212, 0.12); border: 1px solid rgba(6, 182, 212, 0.4); border-radius: var(--radius-sm); padding: 12px 18px; margin-top: 16px;">
+                <div style="display: flex; align-items: center; gap: 12px;">
+                  <span style="font-size: 1.4rem;">🎙️</span>
+                  <div>
+                    <strong id="mys-aff-generated-title"
+                      style="font-size: 0.95rem; color: var(--text-primary);">Affirmation Voice</strong>
+                    <p id="mys-aff-generated-meta" style="font-size: 0.78rem; color: #22d3ee; margin-top: 2px;">⏱️ 0:00
+                      • Generated & Ready to Mix</p>
+                  </div>
+                </div>
+                <span class="badge badge-tts" style="font-size: 0.75rem;">Voice Ready</span>
+              </div>
+            </div>
+
+            <!-- STEP 3: Live Mix Preview & 1-Click Master Subliminal Download -->
+            <div class="glass-card" style="border-left: 4px solid var(--status-success); padding: 24px;">
+              <div style="margin-bottom: 16px;">
+                <div style="display: flex; align-items: center; gap: 10px;">
+                  <span
+                    style="background: var(--status-success); color: white; border-radius: 50%; width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.88rem;">3</span>
+                  <h3 style="font-size: 1.25rem; font-weight: 700;">Live Real-Time Preview & Master Export</h3>
+                </div>
+                <p style="font-size: 0.85rem; color: var(--text-muted); margin-top: 4px;">
+                  Adjust relative volume levels, preview the layered audio live, and download your finalized subliminal
+                  track.
+                </p>
+              </div>
+
+              <!-- Live Preview Controls -->
+              <div
+                style="background: rgba(0,0,0,0.3); border: 1px solid var(--border-glow); border-radius: var(--radius-md); padding: 18px; margin-bottom: 20px;">
+                <div
+                  style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 14px; margin-bottom: 16px;">
+                  <div style="display: flex; align-items: center; gap: 10px;">
+                    <button type="button" class="btn btn-primary" id="mys-preview-play-btn" style="padding: 10px 18px;">
+                      <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+                        <polygon points="5 3 19 12 5 21 5 3" />
+                      </svg>
+                      Listen & Preview Subliminal Mix
+                    </button>
+                    <button type="button" class="btn btn-outline" id="mys-preview-stop-btn" style="padding: 10px 14px;"
+                      title="Stop Preview">
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                        <rect x="6" y="6" width="12" height="12" />
+                      </svg>
+                      Stop
+                    </button>
+                  </div>
+                  <span style="font-size: 0.78rem; color: var(--text-muted);">
+                    💡 <em>Move sliders while playing to balance background music vs affirmations live.</em>
+                  </span>
+                </div>
+
+                <!-- Relative Volume Sliders Grid -->
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                  <div class="glass-card" style="padding: 14px; background: rgba(255,255,255,0.03);">
+                    <div
+                      style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                      <span style="font-size: 0.85rem; font-weight: 600;">🎵 Background Music Volume</span>
+                      <span id="mys-bg-vol-val"
+                        style="font-family: var(--font-mono); font-size: 0.82rem; color: var(--text-accent);">0
+                        dB</span>
+                    </div>
+                    <input type="range" id="mys-bg-vol-slider" min="-24" max="10" step="1" value="0"
+                      class="custom-range">
+                  </div>
+
+                  <div class="glass-card" style="padding: 14px; background: rgba(255,255,255,0.03);">
+                    <div
+                      style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                      <span style="font-size: 0.85rem; font-weight: 600;">🎙️ Affirmations Volume (Subliminal
+                        Level)</span>
+                      <span id="mys-aff-vol-val"
+                        style="font-family: var(--font-mono); font-size: 0.82rem; color: var(--accent-secondary);">-14
+                        dB</span>
+                    </div>
+                    <input type="range" id="mys-aff-vol-slider" min="-36" max="6" step="1" value="-14"
+                      class="custom-range">
+                    <div
+                      style="display: flex; justify-content: space-between; margin-top: 4px; font-size: 0.72rem; color: var(--text-muted);">
+                      <span>Quiet Subliminal (-24dB)</span>
+                      <span>Audible Voice (0dB)</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Final Export Form -->
+              <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 20px; align-items: flex-end;">
+                <div class="form-group" style="margin-bottom: 0;">
+                  <label class="form-label">Subliminal Track Title</label>
+                  <input type="text" id="mys-sub-title" class="form-input"
+                    placeholder="e.g. 528Hz Wealth & Supreme Confidence Subliminal">
+                  <div style="display: flex; align-items: center; gap: 8px; margin-top: 10px;">
+                    <input type="checkbox" id="mys-loop-bg" checked
+                      style="width: 18px; height: 18px; accent-color: var(--accent-primary);">
+                    <label for="mys-loop-bg"
+                      style="font-size: 0.85rem; color: var(--text-secondary); cursor: pointer;">Loop background audio
+                      to match affirmations duration</label>
+                  </div>
+                </div>
+
+                <button type="button" id="mys-final-export-btn" class="btn btn-primary"
+                  style="padding: 14px 20px; height: 48px; font-weight: 700; font-size: 0.95rem;">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                    <polyline points="7 10 12 15 17 10" />
+                    <line x1="12" y1="15" x2="12" y2="3" />
+                  </svg>
+                  ✨ Create & Download Complete Subliminal Track
+                </button>
+              </div>
+
+              <!-- Download Success Banner -->
+              <div id="mys-download-success-box"
+                style="display: none; background: rgba(16, 185, 129, 0.15); border: 1px solid var(--status-success); border-radius: var(--radius-md); padding: 18px 24px; margin-top: 20px;">
+                <div
+                  style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 14px;">
+                  <div style="display: flex; align-items: center; gap: 14px;">
+                    <span style="font-size: 1.8rem;">🎉</span>
+                    <div>
+                      <h4 style="font-size: 1.05rem; font-weight: 700; color: white;">Subliminal Track Created!</h4>
+                      <p id="mys-success-title"
+                        style="font-size: 0.85rem; color: var(--text-secondary); margin-top: 2px;">Track Name</p>
+                    </div>
+                  </div>
+                  <button type="button" id="mys-direct-download-btn" class="btn btn-primary"
+                    style="background: var(--status-success); border-color: var(--status-success); padding: 12px 22px; font-weight: 700;">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                      <polyline points="7 10 12 15 17 10" />
+                      <line x1="12" y1="15" x2="12" y2="3" />
+                    </svg>
+                    ⬇️ Download Subliminal (MP3)
+                  </button>
+                </div>
+              </div>
+
+            </div>
+
+          </div>
+        </section>
+
+        <!-- TAB 3: Audio Editor -->
+        <section class="tab-pane" id="tab-editor">
+          <div class="glass-card" style="margin-bottom: 24px;">
+            <div class="form-group" style="margin-bottom: 0;">
+              <label class="form-label">Select Audio Track from Library</label>
+              <select id="editor-track-select" class="form-select">
+                <option value="">-- Choose a Track to Edit --</option>
+              </select>
+            </div>
+          </div>
+
+          <div id="editor-controls-panel" style="display: none;">
+            <!-- Audio Stats -->
+            <div class="glass-card" style="padding: 16px 24px; margin-bottom: 24px; display: flex; gap: 32px;">
+              <div>
+                <span style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase;">Duration</span>
+                <p id="editor-info-duration"
+                  style="font-size: 1.1rem; font-weight: 700; font-family: var(--font-mono); color: var(--text-accent);">
+                  --</p>
+              </div>
+              <div>
+                <span style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase;">Sample
+                  Rate</span>
+                <p id="editor-info-rate" style="font-size: 1.1rem; font-weight: 700; font-family: var(--font-mono);">--
+                </p>
+              </div>
+              <div>
+                <span style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase;">Peak
+                  Volume</span>
+                <p id="editor-info-dbfs" style="font-size: 1.1rem; font-weight: 700; font-family: var(--font-mono);">--
+                </p>
+              </div>
+            </div>
+
+            <!-- Operations Grid -->
+            <div class="studio-grid">
+              <!-- 1. Trim -->
+              <div class="glass-card">
+                <h3 style="font-size: 1.1rem; font-weight: 700; margin-bottom: 14px;">✂️ Trim Audio</h3>
+                <form id="editor-trim-form">
+                  <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+                    <div class="form-group">
+                      <label class="form-label">Start (seconds)</label>
+                      <input type="number" id="trim-start" class="form-input" min="0" step="0.1" value="0">
+                    </div>
+                    <div class="form-group">
+                      <label class="form-label">End (seconds)</label>
+                      <input type="number" id="trim-end" class="form-input" min="0.1" step="0.1">
+                    </div>
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label">Output Title (Optional)</label>
+                    <input type="text" id="trim-title" class="form-input" placeholder="e.g. Intro Trimmed">
+                  </div>
+                  <button type="submit" id="trim-submit-btn" class="btn btn-primary" style="width: 100%;">Apply
+                    Trim</button>
+                </form>
+              </div>
+
+              <!-- 2. Speed Shift -->
+              <div class="glass-card">
+                <h3 style="font-size: 1.1rem; font-weight: 700; margin-bottom: 14px;">⚡ Speed Shift (0.25x – 4.0x)</h3>
+                <form id="editor-speed-form">
+                  <div class="form-group">
+                    <label class="form-label">
+                      <span>Playback Multiplier</span>
+                      <span class="slider-val" id="editor-speed-val">1.00x</span>
+                    </label>
+                    <input type="range" id="editor-speed-slider" min="0.25" max="4.0" step="0.05" value="1.0"
+                      class="custom-range">
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label">Output Title (Optional)</label>
+                    <input type="text" id="speed-title" class="form-input" placeholder="e.g. Slow Subliminal 0.75x">
+                  </div>
+                  <button type="submit" id="speed-submit-btn" class="btn btn-primary" style="width: 100%;">Apply Speed
+                    Change</button>
+                </form>
+              </div>
+
+              <!-- 3. Fade In/Out -->
+              <div class="glass-card">
+                <h3 style="font-size: 1.1rem; font-weight: 700; margin-bottom: 14px;">🌊 Fade In & Fade Out</h3>
+                <form id="editor-fade-form">
+                  <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+                    <div class="form-group">
+                      <label class="form-label">Fade In (seconds)</label>
+                      <input type="number" id="fade-in" class="form-input" min="0" step="0.5" value="2.0">
+                    </div>
+                    <div class="form-group">
+                      <label class="form-label">Fade Out (seconds)</label>
+                      <input type="number" id="fade-out" class="form-input" min="0" step="0.5" value="2.0">
+                    </div>
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label">Output Title (Optional)</label>
+                    <input type="text" id="fade-title" class="form-input" placeholder="e.g. Smooth Fade Track">
+                  </div>
+                  <button type="submit" id="fade-submit-btn" class="btn btn-primary" style="width: 100%;">Apply
+                    Fades</button>
+                </form>
+              </div>
+
+              <!-- 4. Normalize -->
+              <div class="glass-card">
+                <h3 style="font-size: 1.1rem; font-weight: 700; margin-bottom: 14px;">🔊 Volume Normalization</h3>
+                <form id="editor-norm-form">
+                  <div class="form-group">
+                    <label class="form-label">Target Level (dBFS)</label>
+                    <select id="norm-target" class="form-select">
+                      <option value="-14.0">Streaming Standard (-14 dBFS)</option>
+                      <option value="-20.0" selected>Subliminal Background (-20 dBFS)</option>
+                      <option value="-24.0">Ultra-Quiet Subconscious (-24 dBFS)</option>
+                    </select>
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label">Output Title (Optional)</label>
+                    <input type="text" id="norm-title" class="form-input" placeholder="e.g. Normalized Background">
+                  </div>
+                  <button type="submit" id="norm-submit-btn" class="btn btn-primary" style="width: 100%;">Normalize
+                    Audio</button>
+                </form>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- TAB 4: Subliminal Bundles (Simultaneous Layering) -->
+        <section class="tab-pane" id="tab-mixer">
+          <div class="glass-card" style="margin-bottom: 24px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+              <div>
+                <h2 style="font-size: 1.25rem; font-weight: 700;">🔮 Subliminal Bundles (Simultaneous Layering)</h2>
+                <p style="font-size: 0.85rem; color: var(--text-muted);">Bundle multiple subliminals together to
+                  <strong>play all at the exact same time</strong> in one layered master audio track.
+                </p>
+              </div>
+              <button class="btn btn-secondary" id="mixer-add-layer-btn">+ Add Subliminal Layer</button>
+            </div>
+
+            <!-- Live Mix Preview Bar -->
+            <div class="glass-card"
+              style="background: rgba(139, 92, 246, 0.08); border-color: var(--border-glow); padding: 16px 20px; margin-bottom: 20px; display: flex; flex-direction: column; gap: 12px;">
+              <div
+                style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px;">
+                <div style="display: flex; align-items: center; gap: 10px;">
+                  <button class="btn btn-primary" id="mixer-preview-play-btn" style="padding: 10px 18px;">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+                      <polygon points="5 3 19 12 5 21 5 3" />
+                    </svg>
+                    Listen & Preview Live Bundle
+                  </button>
+                  <button class="btn btn-outline" id="mixer-preview-stop-btn" style="padding: 10px 14px;"
+                    title="Stop Live Mix">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                      <rect x="6" y="6" width="12" height="12" />
+                    </svg>
+                    Stop
+                  </button>
+                </div>
+                <div
+                  style="font-family: var(--font-mono); font-size: 0.88rem; color: var(--text-accent); font-weight: 600;"
+                  id="mixer-preview-time">
+                  00:00 / 00:00
+                </div>
+              </div>
+
+              <!-- Master Timeline Scrubber -->
+              <div class="timeline-bar" id="mixer-master-timeline" style="height: 8px;">
+                <div class="timeline-progress" id="mixer-preview-progress"></div>
+              </div>
+              <p style="font-size: 0.75rem; color: var(--text-muted);">
+                💡 <em>Adjust any layer's volume slider, delay, or mute/solo buttons in real time while playing to
+                  balance your subliminal bundle live.</em>
+              </p>
+            </div>
+
+            <div id="mixer-layers-container">
+              <!-- Dynamically populated layers -->
+            </div>
+
+            <div
+              style="margin-top: 24px; padding-top: 20px; border-top: 1px solid var(--border-subtle); display: grid; grid-template-columns: 2fr 1fr; gap: 20px; align-items: flex-end;">
+              <div class="form-group" style="margin-bottom: 0;">
+                <label class="form-label">Subliminal Bundle Title</label>
+                <input type="text" id="mixer-title" class="form-input"
+                  placeholder="e.g. 10x Mega Wealth & Confidence Bundle">
+                <div style="display: flex; align-items: center; gap: 8px; margin-top: 10px;">
+                  <input type="checkbox" id="mixer-loop-shorter" checked
+                    style="width: 18px; height: 18px; accent-color: var(--accent-primary);">
+                  <label for="mixer-loop-shorter"
+                    style="font-size: 0.85rem; color: var(--text-secondary); cursor: pointer;">Loop shorter tracks to
+                    match longest audio</label>
+                </div>
+              </div>
+
+              <button class="btn btn-primary" id="mixer-export-btn" style="padding: 14px 20px; height: 48px;">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                  <polyline points="7 10 12 15 17 10" />
+                  <line x1="12" y1="15" x2="12" y2="3" />
+                </svg>
+                Export Subliminal Bundle
+              </button>
+            </div>
+          </div>
+        </section>
+
+        <!-- TAB 5: Playlist Maker (Sequential 1-by-1 Concatenation) -->
+        <section class="tab-pane" id="tab-bundles">
+          <div style="max-width: 960px; margin: 0 auto;">
+            <div class="glass-card" style="margin-bottom: 20px;">
+              <div style="margin-bottom: 14px;">
+                <h3 style="font-size: 1.2rem; font-weight: 700;">🎵 Subliminal Playlist Maker (Sequential 1-by-1
+                  Sequence)</h3>
+                <p style="font-size: 0.85rem; color: var(--text-muted); margin-top: 4px;">
+                  Sequence multiple subliminals <strong>one by one in order</strong> (Track 1 ➔ Track 2 ➔ Track 3) into
+                  a single continuous track.
+                </p>
+              </div>
+              <form id="create-playlist-form" style="display: flex; gap: 10px;">
+                <input type="text" id="new-playlist-title" class="form-input"
+                  placeholder="e.g. Full Night Sleep Routine (3-Hour Sequence)..." required>
+                <button type="submit" class="btn btn-primary" style="white-space: nowrap;">Create Playlist</button>
+              </form>
+            </div>
+
+            <div id="playlists-list-container">
+              <!-- Populated via JS -->
+            </div>
+          </div>
+        </section>
+
+      </div>
+      </main>
+    </div>
+
+    <!-- Audio Player Dock -->
+    <footer class="player-dock hidden" id="player-dock">
+      <div class="player-left">
+        <div class="player-track-art">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="white">
+            <path d="M9 18V5l12-2v13" />
+            <circle cx="6" cy="18" r="3" />
+            <circle cx="18" cy="16" r="3" />
+          </svg>
+        </div>
+        <div style="overflow: hidden;">
+          <p id="player-track-title"
+            style="font-size: 0.92rem; font-weight: 600; white-space: nowrap; text-overflow: ellipsis; overflow: hidden;">
+            Track Title</p>
+          <p id="player-track-artist" style="font-size: 0.75rem; color: var(--text-accent); font-weight: 600;">STUDIO
+          </p>
+        </div>
+      </div>
+
+      <div class="player-center">
+        <div class="player-controls">
+          <button class="play-main-btn" id="player-play-btn">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+              <polygon points="5 3 19 12 5 21 5 3" />
+            </svg>
+          </button>
+        </div>
+        <div class="player-timeline-wrapper">
+          <span class="player-time" id="player-curr-time">00:00</span>
+          <div class="timeline-bar" id="player-timeline">
+            <div class="timeline-progress" id="player-progress"></div>
+          </div>
+          <span class="player-time" id="player-total-time">00:00</span>
+        </div>
+      </div>
+
+      <div class="player-right">
+        <button class="btn-icon" id="player-download-btn" title="Download Playing Track" style="margin-right: 6px;">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+            <polyline points="7 10 12 15 17 10" />
+            <line x1="12" y1="15" x2="12" y2="3" />
+          </svg>
+        </button>
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" />
+          <path d="M15.54 8.46a5 5 0 0 1 0 7.07" />
+        </svg>
+        <input type="range" id="player-volume" min="0" max="1" step="0.05" value="0.8" class="volume-slider">
+      </div>
+    </footer>
+
+    <!-- Modal: Auth (Sign In / Sign Up) -->
+    <div class="modal-overlay" id="auth-modal">
+      <div class="modal-window">
+        <!-- Login Card -->
+        <div id="login-card">
+          <div class="modal-header">
+            <h2 class="modal-title">Welcome to Sublivra</h2>
+          </div>
+          <p style="font-size: 0.88rem; color: var(--text-muted); margin-bottom: 20px;">Sign in to access your
+            customized
+            affirmation tracks and mixer studio.</p>
+          <form id="login-form">
+            <div class="form-group">
+              <label class="form-label">Email Address</label>
+              <input type="email" id="login-email" class="form-input" placeholder="you@domain.com" required>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Password</label>
+              <input type="password" id="login-password" class="form-input" placeholder="••••••••" required>
+            </div>
+            <button type="submit" id="login-submit-btn" class="btn btn-primary"
+              style="width: 100%; padding: 12px; margin-top: 10px;">Sign In</button>
+          </form>
+          <p style="font-size: 0.85rem; color: var(--text-muted); text-align: center; margin-top: 18px;">
+            Don't have an account? <a href="#" id="toggle-to-register"
+              style="color: var(--text-accent); font-weight: 600;">Create Account</a>
+          </p>
+        </div>
+
+        <!-- Register Card -->
+        <div id="register-card" style="display: none;">
+          <div class="modal-header">
+            <h2 class="modal-title">Create Account</h2>
+          </div>
+          <form id="register-form">
+            <div class="form-group">
+              <label class="form-label">Username</label>
+              <input type="text" id="reg-username" class="form-input" placeholder="creator123" required>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Email Address</label>
+              <input type="email" id="reg-email" class="form-input" placeholder="you@domain.com" required>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Password</label>
+              <input type="password" id="reg-password" class="form-input" placeholder="••••••••" required>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Confirm Password</label>
+              <input type="password" id="reg-password-confirm" class="form-input" placeholder="••••••••" required>
+            </div>
+            <button type="submit" id="reg-submit-btn" class="btn btn-primary"
+              style="width: 100%; padding: 12px; margin-top: 10px;">Create Account</button>
+          </form>
+          <p style="font-size: 0.85rem; color: var(--text-muted); text-align: center; margin-top: 18px;">
+            Already have an account? <a href="#" id="toggle-to-login"
+              style="color: var(--text-accent); font-weight: 600;">Sign In</a>
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal: Upload Audio -->
+    <div class="modal-overlay" id="upload-modal">
+      <div class="modal-window">
+        <div class="modal-header">
+          <h2 class="modal-title">Upload Audio Track</h2>
+          <button class="btn-icon" id="btn-close-upload" style="border: none;">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="18" y1="6" x2="6" y2="18" />
+              <line x1="6" y1="6" x2="18" y2="18" />
+            </svg>
+          </button>
+        </div>
+        <form id="upload-form">
+          <div class="form-group">
+            <label class="form-label">Audio File (MP3, WAV, FLAC, M4A, OGG)</label>
+            <input type="file" id="upload-file-input" class="form-input" accept="audio/*" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Track Title (Optional)</label>
+            <input type="text" id="upload-title-input" class="form-input" placeholder="Leave blank to use filename">
+          </div>
+
+          <div
+            style="background: rgba(139, 92, 246, 0.1); border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); padding: 14px; margin: 16px 0;">
+            <div style="display: flex; gap: 10px; align-items: flex-start;">
+              <input type="checkbox" id="upload-consent-checkbox" required
+                style="margin-top: 3px; accent-color: var(--accent-primary); width: 16px; height: 16px;">
+              <label for="upload-consent-checkbox"
+                style="font-size: 0.82rem; color: var(--text-secondary); line-height: 1.4; cursor: pointer;">
+                <strong>Rights & Ownership Confirmation:</strong> I confirm that I own this audio file or have explicit
+                licensing and copyright permission to upload, edit, layer, and process this content on Sublivra.
+              </label>
+            </div>
+          </div>
+
+          <button type="submit" id="upload-submit-btn" class="btn btn-primary"
+            style="width: 100%; padding: 12px;">Upload
+            Track</button>
+        </form>
+      </div>
+    </div>
+
+    <!-- Modal: YouTube Rights-Verified Import -->
+    <div class="modal-overlay" id="yt-modal">
+      <div class="modal-window">
+        <div class="modal-header">
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="#ef4444">
+              <polygon points="5 3 19 12 5 21 5 3" />
+            </svg>
+            <h2 class="modal-title">YouTube Audio Import</h2>
+          </div>
+          <button class="btn-icon" id="btn-close-yt-modal" style="border: none;">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="18" y1="6" x2="6" y2="18" />
+              <line x1="6" y1="6" x2="18" y2="18" />
+            </svg>
+          </button>
+        </div>
+
+        <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 16px;">Import audio only when you own the
+          rights or have creator authorization.</p>
+
+        <form id="yt-import-form">
+          <div class="form-group">
+            <label class="form-label">YouTube Video URL</label>
+            <div style="display: flex; gap: 8px;">
+              <input type="url" id="yt-url-input" class="form-input" placeholder="https://www.youtube.com/watch?v=..."
+                required>
+              <button type="button" id="yt-check-btn" class="btn btn-secondary" style="white-space: nowrap;">Check
+                Video</button>
+            </div>
+          </div>
+
+          <!-- Video Preview Card -->
+          <div id="yt-preview-card"
+            style="display: none; background: var(--bg-card); border: 1px solid var(--border-subtle); border-radius: var(--radius-md); padding: 12px; margin-bottom: 16px; gap: 12px; align-items: center;">
+            <img id="yt-preview-thumb" src="" alt="Thumbnail"
+              style="width: 80px; height: 50px; object-fit: cover; border-radius: 4px;">
+            <div style="overflow: hidden;">
+              <p id="yt-preview-title"
+                style="font-weight: 600; font-size: 0.88rem; white-space: nowrap; text-overflow: ellipsis; overflow: hidden;">
+              </p>
+              <p style="font-size: 0.78rem; color: var(--text-muted);"><span id="yt-preview-channel"></span> • <span
+                  id="yt-preview-duration"></span></p>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">License / Ownership Details</label>
+            <input type="text" id="yt-license-info" class="form-input"
+              placeholder="e.g. Creator-owned audio / Creative Commons license">
+          </div>
+
+          <div
+            style="background: rgba(239, 68, 68, 0.08); border: 1px solid rgba(239, 68, 68, 0.25); border-radius: var(--radius-sm); padding: 14px; margin: 16px 0;">
+            <div style="display: flex; gap: 10px; align-items: flex-start;">
+              <input type="checkbox" id="yt-consent-checkbox" required
+                style="margin-top: 3px; accent-color: #ef4444; width: 16px; height: 16px;">
+              <label for="yt-consent-checkbox"
+                style="font-size: 0.82rem; color: var(--text-secondary); line-height: 1.4; cursor: pointer;">
+                <strong>Legal Confirmation:</strong> I confirm that I own this content or have explicit
+                permission/licensing that permits downloading and using its audio on Sublivra.
+              </label>
+            </div>
+          </div>
+
+          <button type="submit" id="yt-import-submit-btn" class="btn btn-primary" style="width: 100%; padding: 12px;"
+            disabled>Import Audio to Library</button>
+        </form>
+      </div>
+    </div>
+
+    <!-- Modal: Playlist Track Picker (Multi-Select Checkboxes) -->
+    <div class="modal-overlay" id="playlist-picker-modal">
+      <div class="modal-window" style="max-width: 580px;">
+        <div class="modal-header">
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M9 18V5l12-2v13" />
+              <circle cx="6" cy="18" r="3" />
+              <circle cx="18" cy="16" r="3" />
+            </svg>
+            <h2 class="modal-title">Select Tracks for Playlist</h2>
+          </div>
+          <button class="btn-icon" id="btn-close-playlist-picker" style="border: none;">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="18" y1="6" x2="6" y2="18" />
+              <line x1="6" y1="6" x2="18" y2="18" />
+            </svg>
+          </button>
+        </div>
+
+        <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 14px;">
+          Click the checkboxes near the tracks you want to add in bulk, then click Add Selected.
+        </p>
+
+        <!-- Selection controls -->
+        <div
+          style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; padding: 6px 0; border-bottom: 1px solid var(--border-subtle);">
+          <div style="display: flex; gap: 8px;">
+            <button type="button" class="btn btn-outline btn-sm" id="playlist-select-all-btn">Select All</button>
+            <button type="button" class="btn btn-outline btn-sm" id="playlist-deselect-all-btn">Deselect All</button>
+          </div>
+          <span style="font-size: 0.78rem; color: var(--text-muted);">Pick tracks to sequence</span>
+        </div>
+
+        <!-- Tracks list with checkboxes -->
+        <div id="playlist-picker-tracks-list"
+          style="display: flex; flex-direction: column; gap: 8px; max-height: 320px; overflow-y: auto; padding-right: 4px; margin-bottom: 18px;">
+          <!-- Populated via JS -->
+        </div>
+
+        <button type="button" id="playlist-confirm-add-btn" class="btn btn-primary" style="width: 100%; padding: 12px;">
+          Add Selected Tracks to Playlist
+        </button>
+      </div>
+    </div>
+
+    <!-- Toast Notification Container -->
+    <div class="toast-container" id="toast-container"></div>
+
+    <!-- Scripts with Cache Busting -->
+    <script src="/static/js/api.js?v=11.0"></script>
+    <script src="/static/js/player.js?v=11.0"></script>
+    <script src="/static/js/auth.js?v=11.0"></script>
+    <script src="/static/js/library.js?v=11.0"></script>
+    <script src="/static/js/tts.js?v=11.0"></script>
+    <script src="/static/js/editor.js?v=11.0"></script>
+    <script src="/static/js/mixer.js?v=11.0"></script>
+    <script src="/static/js/youtube.js?v=11.0"></script>
+    <script src="/static/js/bundles.js?v=11.0"></script>
+    <script src="/static/js/app.js?v=11.0"></script>
+</body>
+
+</html>
