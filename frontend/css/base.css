@@ -220,38 +220,52 @@ body {
 }
 
 .top-bar {
-  height: 70px;
-  padding: 0 32px;
+  min-height: 86px;
+  height: auto;
+  padding: 16px 36px;
   display: flex;
   align-items: center;
   justify-content: space-between;
   border-bottom: 1px solid var(--border-subtle);
   background: var(--bg-glass);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
   z-index: 10;
+  gap: 24px;
+}
+
+.page-heading {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  justify-content: center;
 }
 
 .page-heading h1 {
-  font-size: 1.4rem;
+  font-size: 1.45rem;
   font-weight: 700;
   letter-spacing: -0.3px;
+  line-height: 1.25;
+  margin: 0;
 }
 
 .page-heading p {
   font-size: 0.85rem;
   color: var(--text-muted);
+  line-height: 1.4;
+  margin: 0;
 }
 
 .top-bar-actions {
   display: flex;
   align-items: center;
   gap: 12px;
+  flex-shrink: 0;
 }
 
 .content-viewport {
   flex: 1;
-  padding: 32px;
+  padding: 28px 36px 120px;
   overflow-y: auto;
   position: relative;
 }
