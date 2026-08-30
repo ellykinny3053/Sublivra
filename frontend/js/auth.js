@@ -52,6 +52,19 @@ class AuthManager {
         document.getElementById('login-card').style.display = 'block';
       });
     }
+
+    const headerAuthBtn = document.getElementById('header-auth-btn');
+    if (headerAuthBtn) {
+      headerAuthBtn.addEventListener('click', () => {
+        if (this.currentUser) {
+          if (confirm(`Logged in as @${this.currentUser.username} (${this.currentUser.email || ''}). Sign out?`)) {
+            this.handleLogout();
+          }
+        } else {
+          this.showAuthModal();
+        }
+      });
+    }
   }
 
   async handleLogin(e) {
@@ -140,21 +153,41 @@ class AuthManager {
   }
 
   updateUserUI() {
-    if (!this.currentUser) return;
     const nameEl = document.getElementById('user-display-name');
     const emailEl = document.getElementById('user-display-email');
     const avatarEl = document.getElementById('user-display-avatar');
+    const headerAuthBtn = document.getElementById('header-auth-btn');
 
-    if (nameEl) nameEl.textContent = this.currentUser.username || 'User';
-    if (emailEl) emailEl.textContent = this.currentUser.email || '';
-    if (avatarEl) {
-      avatarEl.textContent = (this.currentUser.username || 'U').charAt(0).toUpperCase();
+    if (this.currentUser) {
+      if (nameEl) nameEl.textContent = this.currentUser.username || 'User';
+      if (emailEl) emailEl.textContent = this.currentUser.email || '';
+      if (avatarEl) {
+        avatarEl.textContent = (this.currentUser.username || 'U').charAt(0).toUpperCase();
+      }
+      if (headerAuthBtn) {
+        headerAuthBtn.innerHTML = `
+          <span class="material-symbols-outlined" style="font-size: 16px; margin-right: 4px; vertical-align: middle;">account_circle</span>
+          <span>${this.currentUser.username}</span>
+        `;
+        headerAuthBtn.className = 'btn btn-secondary btn-sm';
+        headerAuthBtn.title = `Logged in as @${this.currentUser.username} (Click to sign out)`;
+      }
+    } else {
+      if (nameEl) nameEl.textContent = 'Guest User';
+      if (emailEl) emailEl.textContent = 'Not logged in';
+      if (avatarEl) avatarEl.textContent = 'G';
+      if (headerAuthBtn) {
+        headerAuthBtn.textContent = 'Sign In / Register';
+        headerAuthBtn.className = 'btn btn-primary btn-sm';
+        headerAuthBtn.title = 'Sign In or Register';
+      }
     }
   }
 
   handleLogout() {
     window.api.clearTokens();
     this.currentUser = null;
+    this.updateUserUI();
     window.toast.show('Logged out', 'info');
     this.showAuthModal();
   }
