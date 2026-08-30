@@ -138,6 +138,10 @@ def download_audio(url):
         'quiet': True,
         'no_warnings': True,
         'no_color': True,
+        # Security & resource limits (M-2)
+        'socket_timeout': 30,
+        'retries': 2,
+        'max_filesize': 100 * 1024 * 1024,  # 100MB max
     }
 
     try:

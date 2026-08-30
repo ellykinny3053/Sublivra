@@ -131,7 +131,7 @@ class TrackUpdateSerializer(serializers.ModelSerializer):
 
 class TTSGenerateSerializer(serializers.Serializer):
     """Serializer for TTS generation request."""
-    text = serializers.CharField(max_length=10000)
+    text = serializers.CharField(max_length=2000)
     title = serializers.CharField(max_length=255, required=False, default='')
     language = serializers.CharField(max_length=10, default='en')
     voice = serializers.CharField(max_length=100, required=False, default='en-US-JennyNeural')
@@ -141,6 +141,9 @@ class TTSGenerateSerializer(serializers.Serializer):
     def validate_text(self, value):
         if not value.strip():
             raise serializers.ValidationError("Text cannot be empty.")
+        # Strip HTML/script tags to prevent injection (M-6)
+        import re
+        value = re.sub(r'<[^>]+>', '', value)
         return value.strip()
 
 

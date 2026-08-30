@@ -7,6 +7,15 @@
  * - 1-Click Continuous Playlist Concatenation Export
  */
 
+/**
+ * Escapes HTML special characters to prevent XSS injection (H-5 security fix).
+ */
+function escapeHtmlBundles(str) {
+  if (!str) return '';
+  const div = document.createElement('div');
+  div.textContent = str;
+  return div.innerHTML;
+}
 class PlaylistMaker {
   constructor() {
     this.playlists = [];
@@ -91,7 +100,7 @@ class PlaylistMaker {
           <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 16px; flex-wrap: wrap; gap: 12px;">
             <div>
               <div style="display: flex; align-items: center; gap: 10px;">
-                <h4 style="font-weight: 700; font-size: 1.2rem;">${pl.title}</h4>
+                <h4 style="font-weight: 700; font-size: 1.2rem;">${escapeHtmlBundles(pl.title)}</h4>
                 <span class="badge badge-tts" style="font-size: 0.72rem;">1-BY-1 SEQUENCE</span>
               </div>
               <p style="font-size: 0.84rem; color: var(--text-muted); margin-top: 4px;">
@@ -154,12 +163,12 @@ class PlaylistMaker {
                       </span>
                       <div style="overflow: hidden; flex: 1;">
                         <span style="font-size: 0.92rem; font-weight: 600; color: var(--text-primary); white-space: nowrap; text-overflow: ellipsis; display: block;">
-                          ${t.title || 'Track'}
+                          ${escapeHtmlBundles(t.title) || 'Track'}
                         </span>
                         <div style="display: flex; align-items: center; gap: 8px; font-size: 0.76rem; color: var(--text-muted); margin-top: 2px;">
                           <span>⏱️ ${t.duration_display || '--:--'}</span>
                           <span>•</span>
-                          <span class="badge badge-${t.source_type}" style="font-size: 0.68rem; padding: 1px 6px;">${t.source_type}</span>
+                          <span class="badge badge-${escapeHtmlBundles(t.source_type)}" style="font-size: 0.68rem; padding: 1px 6px;">${escapeHtmlBundles(t.source_type)}</span>
                         </div>
                       </div>
                     </div>
@@ -250,10 +259,10 @@ class PlaylistMaker {
             <input type="checkbox" value="${t.id}" class="playlist-picker-checkbox" ${alreadyIn ? 'disabled checked' : ''} style="width: 20px; height: 20px; accent-color: var(--accent-primary); cursor: pointer;">
             <div style="flex: 1; overflow: hidden;">
               <div style="display: flex; align-items: center; gap: 8px;">
-                <span style="font-weight: 600; font-size: 0.95rem; color: var(--text-primary);">${t.title}</span>
+                <span style="font-weight: 600; font-size: 0.95rem; color: var(--text-primary);">${escapeHtmlBundles(t.title)}</span>
                 ${alreadyIn ? '<span class="badge badge-mixed" style="font-size: 0.65rem;">Already in Playlist</span>' : ''}
               </div>
-              <span style="font-size: 0.78rem; color: var(--text-muted); margin-top: 2px; display: block;">⏱️ ${t.duration_display || '--:--'} • Source: ${t.source_type}</span>
+              <span style="font-size: 0.78rem; color: var(--text-muted); margin-top: 2px; display: block;">⏱️ ${t.duration_display || '--:--'} • Source: ${escapeHtmlBundles(t.source_type)}</span>
             </div>
           </label>
         `;

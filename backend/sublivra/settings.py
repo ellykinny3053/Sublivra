@@ -25,10 +25,13 @@ except Exception:
         pass
 
 # Security Settings
-SECRET_KEY = os.getenv('SECRET_KEY', 'django-insecure-sublivra-dev-key-change-in-production-!@#$%^&*()')
-DEBUG = os.getenv('DEBUG', 'True').lower() in ('true', '1', 'yes')
+SECRET_KEY = os.getenv('SECRET_KEY', '0wx64em3huav=r6v8@ufcmvs_#3%tc^g&xp_q=z5nw+%o3#kr2')
+DEBUG = os.getenv('DEBUG', 'False').lower() in ('true', '1', 'yes')
 
-ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', '*').split(',')
+ALLOWED_HOSTS = os.getenv(
+    'ALLOWED_HOSTS',
+    'sublivra-production.up.railway.app,localhost,127.0.0.1'
+).split(',')
 CSRF_TRUSTED_ORIGINS = [
     origin.strip() for origin in os.getenv(
         'CSRF_TRUSTED_ORIGINS',
@@ -158,21 +161,48 @@ REST_FRAMEWORK = {
     ),
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
     'PAGE_SIZE': 20,
+    'DEFAULT_THROTTLE_CLASSES': [
+        'rest_framework.throttling.AnonRateThrottle',
+        'rest_framework.throttling.UserRateThrottle',
+    ],
+    'DEFAULT_THROTTLE_RATES': {
+        'anon': '30/minute',
+        'user': '120/minute',
+        'auth': '5/minute',
+    },
 }
 
 # Simple JWT Configuration
 SIMPLE_JWT = {
-    'ACCESS_TOKEN_LIFETIME': timedelta(hours=24),
-    'REFRESH_TOKEN_LIFETIME': timedelta(days=30),
+    'ACCESS_TOKEN_LIFETIME': timedelta(hours=1),
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=7),
     'ROTATE_REFRESH_TOKENS': True,
     'BLACKLIST_AFTER_ROTATION': True,
     'AUTH_HEADER_TYPES': ('Bearer',),
 }
 
-# CORS Configuration
-CORS_ALLOW_ALL_ORIGINS = True
+# CORS Configuration — Explicit allowlist (C-3 security fix)
+CORS_ALLOW_ALL_ORIGINS = False
+CORS_ALLOWED_ORIGINS = [
+    origin.strip() for origin in os.getenv(
+        'CORS_ALLOWED_ORIGINS',
+        'https://sublivra-production.up.railway.app,http://localhost:8000,http://127.0.0.1:8000'
+    ).split(',') if origin.strip()
+]
 CORS_ALLOW_CREDENTIALS = True
 
 # Max upload size: 150MB for long audio files
 DATA_UPLOAD_MAX_MEMORY_SIZE = 157286400
 FILE_UPLOAD_MAX_MEMORY_SIZE = 157286400
+
+# ── Production Security Headers (H-3) ──────────────────────────────────────
+if not DEBUG:
+    SECURE_HSTS_SECONDS = 31536000  # 1 year
+    SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+    SECURE_HSTS_PRELOAD = True
+    SECURE_SSL_REDIRECT = True
+    SECURE_CONTENT_TYPE_NOSNIFF = True
+    SESSION_COOKIE_SECURE = True
+    CSRF_COOKIE_SECURE = True
+    X_FRAME_OPTIONS = 'DENY'
+    SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')

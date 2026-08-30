@@ -11,7 +11,7 @@ from .views import api_root
 urlpatterns = [
     path('', TemplateView.as_view(template_name='index.html'), name='app-home'),
     path('api/', api_root, name='api-root'),
-    path('admin/', admin.site.urls),
+    path('studio-ctrl-9x7k2/', admin.site.urls),  # Obscured admin path (M-5)
     path('api/auth/', include('accounts.urls')),
     path('api/tracks/', include('tracks.urls')),
     path('api/bundles/', include('bundles.urls')),

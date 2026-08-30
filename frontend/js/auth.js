@@ -3,6 +3,15 @@
  * Manages login, registration, token storage, and user profile state.
  */
 
+/**
+ * Escapes HTML special characters to prevent XSS injection (H-5 security fix).
+ */
+function escapeHtml(str) {
+  if (!str) return '';
+  const div = document.createElement('div');
+  div.textContent = str;
+  return div.innerHTML;
+}
 class AuthManager {
   constructor() {
     this.currentUser = null;
@@ -167,10 +176,10 @@ class AuthManager {
       if (headerAuthBtn) {
         headerAuthBtn.innerHTML = `
           <span class="material-symbols-outlined" style="font-size: 16px; margin-right: 4px; vertical-align: middle;">account_circle</span>
-          <span>${this.currentUser.username}</span>
+          <span>${escapeHtml(this.currentUser.username)}</span>
         `;
         headerAuthBtn.className = 'btn btn-secondary btn-sm';
-        headerAuthBtn.title = `Logged in as @${this.currentUser.username} (Click to sign out)`;
+        headerAuthBtn.title = `Logged in as @${escapeHtml(this.currentUser.username)} (Click to sign out)`;
       }
     } else {
       if (nameEl) nameEl.textContent = 'Guest User';
@@ -184,7 +193,13 @@ class AuthManager {
     }
   }
 
-  handleLogout() {
+  async handleLogout() {
+    // Server-side token blacklisting (M-3 security fix)
+    try {
+      await window.api.post('/auth/logout/', { refresh: window.api.refreshToken });
+    } catch (err) {
+      // Proceed with local logout even if server call fails
+    }
     window.api.clearTokens();
     this.currentUser = null;
     this.updateUserUI();

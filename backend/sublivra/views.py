@@ -20,6 +20,7 @@ def api_root(request):
                 "refresh": "/api/auth/refresh/",
                 "profile": "/api/auth/me/",
                 "change_password": "/api/auth/change-password/",
+                "logout": "/api/auth/logout/",
             },
             "tracks": {
                 "list_and_filter": "/api/tracks/",
@@ -47,6 +48,6 @@ def api_root(request):
                 "playlist_reorder": "/api/bundles/playlists/<id>/reorder/",
                 "playlist_export_audio": "/api/bundles/playlists/<id>/export/",
             },
-            "admin": "/admin/",
+            "admin": "/studio-ctrl-9x7k2/",
         }
     })
