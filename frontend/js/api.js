@@ -3,11 +3,8 @@
  * Manages JWT tokens, automatic refresh, error handling, and requests.
  */
 
-// Dynamic API Base URL: auto-detects localhost vs production Koyeb backend
-const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
-const API_BASE = isLocal 
-  ? 'http://127.0.0.1:8000/api' 
-  : (window.SUBLIVRA_API_URL || 'https://sublivra-api.koyeb.app/api');
+// Universal API Base URL: works seamlessly on localhost, Railway, Render, and custom domains
+const API_BASE = window.SUBLIVRA_API_URL || '/api';
 
 class ApiClient {
   constructor() {
