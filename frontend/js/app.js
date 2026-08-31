@@ -114,6 +114,28 @@ document.addEventListener('DOMContentLoaded', () => {
     bundles: { title: 'Playlist Maker', desc: 'Sequence multiple subliminals one by one into a single continuous track' },
   };
 
+  // Mobile Sidebar Drawer Management
+  const sidebar = document.getElementById('sidebar');
+  const sidebarBackdrop = document.getElementById('sidebar-backdrop');
+  const mobileToggleBtn = document.getElementById('btn-mobile-sidebar-toggle');
+  const closeSidebarBtn = document.getElementById('btn-close-sidebar');
+
+  function openMobileSidebar() {
+    if (sidebar) sidebar.classList.add('open');
+    if (sidebarBackdrop) sidebarBackdrop.classList.add('active');
+    document.body.style.overflow = 'hidden';
+  }
+
+  function closeMobileSidebar() {
+    if (sidebar) sidebar.classList.remove('open');
+    if (sidebarBackdrop) sidebarBackdrop.classList.remove('active');
+    document.body.style.overflow = '';
+  }
+
+  if (mobileToggleBtn) mobileToggleBtn.addEventListener('click', openMobileSidebar);
+  if (closeSidebarBtn) closeSidebarBtn.addEventListener('click', closeMobileSidebar);
+  if (sidebarBackdrop) sidebarBackdrop.addEventListener('click', closeMobileSidebar);
+
   tabButtons.forEach(btn => {
     btn.addEventListener('click', () => {
       const tabKey = btn.dataset.tab;
@@ -134,6 +156,11 @@ document.addEventListener('DOMContentLoaded', () => {
       if (tabKey === 'bundles' && window.bundles) {
         window.bundles.loadData();
       }
+
+      // Auto-close sidebar on mobile after selecting a workspace
+      if (window.innerWidth <= 900) {
+        closeMobileSidebar();
+      }
     });
   });
 
@@ -145,3 +172,4 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 });
+

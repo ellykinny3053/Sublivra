@@ -19,24 +19,30 @@
 
     gtag('config', 'G-KZL331263Q');
   </script>
-  <link rel="stylesheet" href="/static/css/variables.css?v=14.0">
-  <link rel="stylesheet" href="/static/css/base.css?v=14.0">
-  <link rel="stylesheet" href="/static/css/components.css?v=14.0">
+  <link rel="stylesheet" href="/static/css/variables.css?v=16.0">
+  <link rel="stylesheet" href="/static/css/base.css?v=16.0">
+  <link rel="stylesheet" href="/static/css/components.css?v=16.0">
 </head>
 
 <body>
 
   <div class="app-container">
     <!-- Sidebar -->
-    <aside class="sidebar">
-      <div class="brand-logo" style="display: flex; align-items: center; gap: 14px; padding: 0 8px 24px;">
-        <img src="/static/assets/logo.png?v=2.0" alt="Sublivra Logo"
-          style="width: 48px; height: 38px; object-fit: contain; filter: drop-shadow(0 0 10px rgba(208, 188, 255, 0.45));">
-        <div>
-          <h1 class="brand-title"
-            style="font-size: 1.35rem; font-weight: 800; line-height: 1.1; letter-spacing: -0.5px;">Sublivra</h1>
-          <p style="font-family: var(--font-mono); font-size: 0.72rem; color: var(--text-muted); margin-top: 2px;"></p>
+    <aside class="sidebar" id="sidebar">
+      <div class="brand-logo" style="display: flex; align-items: center; justify-content: space-between; gap: 14px; padding: 0 8px 24px;">
+        <div style="display: flex; align-items: center; gap: 12px;">
+          <img src="/static/assets/logo.png?v=2.0" alt="Sublivra Logo"
+            style="width: 44px; height: 36px; object-fit: contain; filter: drop-shadow(0 0 10px rgba(208, 188, 255, 0.45));">
+          <div>
+            <h1 class="brand-title"
+              style="font-size: 1.35rem; font-weight: 800; line-height: 1.1; letter-spacing: -0.5px;">Sublivra</h1>
+          </div>
         </div>
+        <!-- Close Sidebar on Mobile -->
+        <button type="button" class="btn-icon mobile-only" id="btn-close-sidebar" title="Close Menu"
+          style="width: 36px; height: 36px; border-radius: var(--radius-sm);">
+          <span class="material-symbols-outlined" style="font-size: 20px;">close</span>
+        </button>
       </div>
 
       <div class="nav-section-title">Studio Workspaces</div>
@@ -96,14 +102,25 @@
       </div>
     </aside>
 
+    <!-- Sidebar Backdrop for Mobile -->
+    <div id="sidebar-backdrop" class="sidebar-backdrop"></div>
+
     <!-- Main Content Area -->
     <div class="main-wrapper">
       <!-- Top App Bar -->
       <header class="top-bar">
-        <div class="page-heading">
-          <h1 id="view-heading-title" style="font-size: 1.35rem; font-weight: 700;">Audio Library</h1>
-          <p id="view-heading-desc" style="font-size: 0.82rem; color: var(--text-muted);">Browse, manage, and play your
-            generated, uploaded, and imported tracks</p>
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <!-- Mobile Hamburger Toggle -->
+          <button type="button" class="btn-icon mobile-only" id="btn-mobile-sidebar-toggle" title="Open Navigation Menu"
+            style="width: 38px; height: 38px; border-radius: var(--radius-sm); flex-shrink: 0;">
+            <span class="material-symbols-outlined" style="font-size: 24px; color: var(--text-primary);">menu</span>
+          </button>
+          
+          <div class="page-heading">
+            <h1 id="view-heading-title" style="font-size: 1.35rem; font-weight: 700;">Audio Library</h1>
+            <p id="view-heading-desc" style="font-size: 0.82rem; color: var(--text-muted);">Browse, manage, and play your
+              generated, uploaded, and imported tracks</p>
+          </div>
         </div>
 
         <div class="top-bar-actions" style="display: flex; align-items: center; gap: 12px;">
@@ -1032,16 +1049,16 @@
     <div class="toast-container" id="toast-container"></div>
 
     <!-- Scripts with Cache Busting -->
-    <script src="/static/js/api.js?v=15.0"></script>
-    <script src="/static/js/player.js?v=15.0"></script>
-    <script src="/static/js/auth.js?v=15.0"></script>
-    <script src="/static/js/library.js?v=15.0"></script>
-    <script src="/static/js/tts.js?v=15.0"></script>
-    <script src="/static/js/editor.js?v=15.0"></script>
-    <script src="/static/js/mixer.js?v=15.0"></script>
-    <script src="/static/js/youtube.js?v=15.0"></script>
-    <script src="/static/js/bundles.js?v=15.0"></script>
-    <script src="/static/js/app.js?v=15.0"></script>
+    <script src="/static/js/api.js?v=16.0"></script>
+    <script src="/static/js/player.js?v=16.0"></script>
+    <script src="/static/js/auth.js?v=16.0"></script>
+    <script src="/static/js/library.js?v=16.0"></script>
+    <script src="/static/js/tts.js?v=16.0"></script>
+    <script src="/static/js/editor.js?v=16.0"></script>
+    <script src="/static/js/mixer.js?v=16.0"></script>
+    <script src="/static/js/youtube.js?v=16.0"></script>
+    <script src="/static/js/bundles.js?v=16.0"></script>
+    <script src="/static/js/app.js?v=16.0"></script>
 </body>
 
 </html>
