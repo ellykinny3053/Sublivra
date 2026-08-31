@@ -19,9 +19,9 @@
 
     gtag('config', 'G-KZL331263Q');
   </script>
-  <link rel="stylesheet" href="/static/css/variables.css?v=16.0">
-  <link rel="stylesheet" href="/static/css/base.css?v=16.0">
-  <link rel="stylesheet" href="/static/css/components.css?v=16.0">
+  <link rel="stylesheet" href="/static/css/variables.css?v=17.0">
+  <link rel="stylesheet" href="/static/css/base.css?v=17.0">
+  <link rel="stylesheet" href="/static/css/components.css?v=17.0">
 </head>
 
 <body>
@@ -109,21 +109,37 @@
     <div class="main-wrapper">
       <!-- Top App Bar -->
       <header class="top-bar">
-        <div style="display: flex; align-items: center; gap: 8px;">
-          <!-- Mobile Hamburger Toggle -->
-          <button type="button" class="btn-icon mobile-only" id="btn-mobile-sidebar-toggle" title="Open Navigation Menu"
-            style="width: 38px; height: 38px; border-radius: var(--radius-sm); flex-shrink: 0;">
-            <span class="material-symbols-outlined" style="font-size: 24px; color: var(--text-primary);">menu</span>
-          </button>
-          
-          <div class="page-heading">
-            <h1 id="view-heading-title" style="font-size: 1.35rem; font-weight: 700;">Audio Library</h1>
-            <p id="view-heading-desc" style="font-size: 0.82rem; color: var(--text-muted);">Browse, manage, and play your
-              generated, uploaded, and imported tracks</p>
+        <div class="top-bar-main-row">
+          <div style="display: flex; align-items: center; gap: 10px; min-width: 0; flex: 1;">
+            <!-- Mobile Hamburger Toggle -->
+            <button type="button" class="btn-icon mobile-only" id="btn-mobile-sidebar-toggle" title="Open Navigation Menu"
+              style="width: 38px; height: 38px; border-radius: var(--radius-sm); flex-shrink: 0;">
+              <span class="material-symbols-outlined" style="font-size: 24px; color: var(--text-primary);">menu</span>
+            </button>
+            
+            <div class="page-heading" style="overflow: hidden; min-width: 0;">
+              <h1 id="view-heading-title" style="font-size: 1.35rem; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Audio Library</h1>
+              <p id="view-heading-desc" style="font-size: 0.82rem; color: var(--text-muted);">Browse, manage, and play your
+                generated, uploaded, and imported tracks</p>
+            </div>
+          </div>
+
+          <div class="top-bar-right-controls" style="display: flex; align-items: center; gap: 8px; flex-shrink: 0;">
+            <!-- Dark / Light Edition Toggle Button -->
+            <button type="button" class="btn-icon btn-theme-toggle" title="Toggle Dark / Light Edition"
+              style="border-radius: var(--radius-full); width: 36px; height: 36px;">
+              <span class="material-symbols-outlined theme-toggle-icon"
+                style="font-size: 19px; color: var(--accent-primary);">light_mode</span>
+            </button>
+
+            <button id="header-auth-btn" class="btn btn-primary btn-sm"
+              style="border-radius: var(--radius-full); padding: 7px 14px; white-space: nowrap;">
+              Sign In / Register
+            </button>
           </div>
         </div>
 
-        <div class="top-bar-actions" style="display: flex; align-items: center; gap: 12px;">
+        <div class="top-bar-actions" style="display: flex; align-items: center; gap: 10px;">
           <!-- YouTube Import Quick Action -->
           <button class="btn btn-secondary btn-sm" id="btn-open-yt-modal"
             style="border-radius: var(--radius-full); padding: 7px 14px;">
@@ -138,18 +154,6 @@
             style="border-radius: var(--radius-full); padding: 7px 14px;">
             <span class="material-symbols-outlined" style="font-size: 16px;">cloud_upload</span>
             Upload Audio
-          </button>
-
-          <!-- Dark / Light Edition Toggle Button -->
-          <button type="button" class="btn-icon btn-theme-toggle" title="Toggle Dark / Light Edition"
-            style="border-radius: var(--radius-full); width: 36px; height: 36px;">
-            <span class="material-symbols-outlined theme-toggle-icon"
-              style="font-size: 19px; color: var(--accent-primary);">light_mode</span>
-          </button>
-
-          <button id="header-auth-btn" class="btn btn-primary btn-sm"
-            style="border-radius: var(--radius-full); padding: 7px 16px;">
-            Sign In / Register
           </button>
         </div>
       </header>
@@ -1049,16 +1053,16 @@
     <div class="toast-container" id="toast-container"></div>
 
     <!-- Scripts with Cache Busting -->
-    <script src="/static/js/api.js?v=16.0"></script>
-    <script src="/static/js/player.js?v=16.0"></script>
-    <script src="/static/js/auth.js?v=16.0"></script>
-    <script src="/static/js/library.js?v=16.0"></script>
-    <script src="/static/js/tts.js?v=16.0"></script>
-    <script src="/static/js/editor.js?v=16.0"></script>
-    <script src="/static/js/mixer.js?v=16.0"></script>
-    <script src="/static/js/youtube.js?v=16.0"></script>
-    <script src="/static/js/bundles.js?v=16.0"></script>
-    <script src="/static/js/app.js?v=16.0"></script>
+    <script src="/static/js/api.js?v=17.0"></script>
+    <script src="/static/js/player.js?v=17.0"></script>
+    <script src="/static/js/auth.js?v=17.0"></script>
+    <script src="/static/js/library.js?v=17.0"></script>
+    <script src="/static/js/tts.js?v=17.0"></script>
+    <script src="/static/js/editor.js?v=17.0"></script>
+    <script src="/static/js/mixer.js?v=17.0"></script>
+    <script src="/static/js/youtube.js?v=17.0"></script>
+    <script src="/static/js/bundles.js?v=17.0"></script>
+    <script src="/static/js/app.js?v=17.0"></script>
 </body>
 
 </html>

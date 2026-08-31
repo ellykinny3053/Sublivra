@@ -319,13 +319,37 @@ body {
   opacity: 1;
 }
 
+/* Top bar desktop layout defaults */
+.top-bar-main-row {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex: 1;
+}
+
+.top-bar-right-controls {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+/* ==========================================================================
+   Comprehensive Mobile Responsive Styling (All Workspaces & Tabs)
+   ========================================================================== */
+
 @media (max-width: 900px) {
   .mobile-only {
     display: inline-flex !important;
   }
 
+  html, body {
+    max-width: 100vw;
+    overflow-x: hidden;
+  }
+
   .app-container {
     position: relative;
+    max-width: 100vw;
     overflow-x: hidden;
   }
 
@@ -354,32 +378,253 @@ body {
   .main-wrapper {
     width: 100vw;
     max-width: 100vw;
+    overflow-x: hidden;
   }
 
+  /* Top Bar Mobile Layout */
   .top-bar {
-    padding: 12px 16px;
-    min-height: 64px;
+    padding: 10px 14px;
+    min-height: auto;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 8px;
+  }
+
+  .top-bar-main-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
     gap: 8px;
   }
 
   .page-heading h1 {
     font-size: 1.15rem;
+    line-height: 1.2;
   }
 
   .page-heading p {
-    display: none; /* Hide subtitle on mobile to save vertical space */
+    display: none; /* Hide subtitle on mobile to preserve screen space */
+  }
+
+  .top-bar-right-controls {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-shrink: 0;
   }
 
   .top-bar-actions {
-    gap: 6px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    width: 100%;
+    overflow-x: auto;
+    padding-bottom: 2px;
+    -webkit-overflow-scrolling: touch;
   }
 
-  .top-bar-actions .btn-sm {
-    padding: 6px 10px;
-    font-size: 0.72rem;
+  .top-bar-actions .btn {
+    flex: 1;
+    min-width: fit-content;
+    padding: 6px 12px;
+    font-size: 0.75rem;
+    justify-content: center;
   }
 
   .content-viewport {
-    padding: 16px 14px 120px;
+    padding: 14px 12px 130px;
+    max-width: 100vw;
+    box-sizing: border-box;
+    overflow-x: hidden;
+  }
+
+  .glass-card {
+    padding: 16px !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+    overflow-x: hidden !important;
+  }
+
+  /* --- Tab 1: Audio Library on Mobile --- */
+  #tab-library > div:first-child {
+    flex-direction: column !important;
+    gap: 10px !important;
+  }
+
+  #tab-library > div:first-child > div {
+    width: 100% !important;
+  }
+
+  /* --- Tab 2: Make Your Own Sub (TTS) on Mobile --- */
+  /* Step 1 Header & Tabs */
+  #tab-tts .glass-card:first-child > div:first-child {
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 12px !important;
+  }
+
+  #tab-tts .mys-bg-tab-btn {
+    flex: 1 !important;
+    padding: 7px 4px !important;
+    font-size: 0.72rem !important;
+    text-align: center !important;
+    justify-content: center !important;
+    white-space: nowrap !important;
+  }
+
+  /* Source Pane 1: YouTube Input */
+  #mys-pane-yt > div:first-child {
+    grid-template-columns: 1fr !important;
+    gap: 10px !important;
+  }
+
+  #mys-pane-yt input {
+    width: 100% !important;
+  }
+
+  #mys-yt-import-btn {
+    width: 100% !important;
+    justify-content: center !important;
+  }
+
+  /* Step 2: Voice & Speed Grid */
+  #mys-affirmation-form > div:nth-child(2) {
+    grid-template-columns: 1fr !important;
+    gap: 14px !important;
+  }
+
+  .mys-speed-chip {
+    flex: 1 !important;
+    min-width: 54px !important;
+    text-align: center !important;
+    padding: 4px 2px !important;
+  }
+
+  /* Step 3: Live Preview & Export on Mobile */
+  #tab-tts .glass-card:nth-child(2) > div:nth-child(2) > div:first-child {
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 10px !important;
+  }
+
+  #tab-tts .glass-card:nth-child(2) > div:nth-child(2) > div:first-child > div:first-child {
+    display: flex !important;
+    width: 100% !important;
+    gap: 8px !important;
+  }
+
+  #mys-preview-play-btn {
+    flex: 1 !important;
+    justify-content: center !important;
+  }
+
+  /* Volume Sliders Grid in Step 3 */
+  #tab-tts .glass-card:nth-child(2) > div:nth-child(2) > div:nth-child(2) {
+    grid-template-columns: 1fr !important;
+    gap: 12px !important;
+  }
+
+  /* Final Export Form Grid */
+  #tab-tts .glass-card:nth-child(2) > div:last-child {
+    grid-template-columns: 1fr !important;
+    gap: 14px !important;
+  }
+
+  #mys-final-export-btn {
+    width: 100% !important;
+    justify-content: center !important;
+  }
+
+  /* --- Tab 3: Audio Studio Editor on Mobile --- */
+  #tab-editor .studio-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  #editor-fade-form > div:first-child,
+  #editor-trim-form > div:first-child {
+    grid-template-columns: 1fr !important;
+  }
+
+  #editor-controls-panel > div:first-child {
+    flex-wrap: wrap !important;
+    gap: 16px !important;
+    padding: 14px 16px !important;
+  }
+
+  /* --- Tab 4: Subliminal Bundles (Mixer) on Mobile --- */
+  #tab-mixer .glass-card:first-child > div:first-child {
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 12px !important;
+  }
+
+  #mixer-add-layer-btn {
+    width: 100% !important;
+    justify-content: center !important;
+  }
+
+  #tab-mixer .glass-card:first-child > div:nth-child(2) > div:first-child {
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 10px !important;
+  }
+
+  #tab-mixer .glass-card:first-child > div:nth-child(2) > div:first-child > div:first-child {
+    display: flex !important;
+    width: 100% !important;
+    gap: 8px !important;
+  }
+
+  #mixer-preview-play-btn {
+    flex: 1 !important;
+    justify-content: center !important;
+  }
+
+  .mixer-layer-controls-grid {
+    grid-template-columns: 1fr !important;
+    gap: 12px !important;
+  }
+
+  #tab-mixer .glass-card:first-child > div:last-child {
+    grid-template-columns: 1fr !important;
+    gap: 14px !important;
+  }
+
+  #mixer-export-btn {
+    width: 100% !important;
+    justify-content: center !important;
+  }
+
+  /* --- Tab 5: Playlist Maker on Mobile --- */
+  #create-playlist-form {
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 10px !important;
+  }
+
+  #create-playlist-form input,
+  #create-playlist-form button {
+    width: 100% !important;
+    justify-content: center !important;
+  }
+
+  .playlist-card > div:first-child {
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 12px !important;
+  }
+
+  .playlist-card > div:first-child > div:last-child {
+    display: flex !important;
+    flex-wrap: wrap !important;
+    width: 100% !important;
+    gap: 8px !important;
+  }
+
+  .playlist-card > div:first-child > div:last-child button {
+    flex: 1 !important;
+    justify-content: center !important;
   }
 }
+

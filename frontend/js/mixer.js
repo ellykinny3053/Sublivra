@@ -117,7 +117,7 @@ class AudioMixer {
           ` : ''}
         </div>
 
-        <div style="display: grid; grid-template-columns: 2fr 1.2fr 1fr; gap: 16px; align-items: center;">
+        <div class="mixer-layer-controls-grid" style="display: grid; grid-template-columns: 2fr 1.2fr 1fr; gap: 16px; align-items: center;">
           <!-- Track Select -->
           <div>
             <label class="form-label" style="font-size: 0.75rem; margin-bottom: 4px;">Audio Source</label>
