@@ -1,8 +1,20 @@
 /**
  * Application Master Controller
  * Handles Toast notifications, Tab navigation, Theme Toggle (Dark/Light),
- * and Global initialization.
+ * Global initialization, and Google Analytics Custom Event Tracking.
  */
+
+// --- Global Analytics Event Tracker ---
+window.trackEvent = function(eventName, params = {}) {
+  try {
+    if (typeof window.gtag === 'function') {
+      window.gtag('event', eventName, params);
+      console.log(`[Analytics] Event tracked: ${eventName}`, params);
+    }
+  } catch (e) {
+    // Ignore analytics errors silently
+  }
+};
 
 class ToastManager {
   constructor() {

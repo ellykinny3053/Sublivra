@@ -218,6 +218,7 @@ class PlaylistMaker {
         window.toast.show(`Playlist "${title}" created successfully!`, 'success');
         titleInput.value = '';
         await this.loadPlaylists();
+        if (window.trackEvent) window.trackEvent('playlist_created', { title: title });
       } else {
         const errData = await response.json().catch(() => ({}));
         window.toast.show(errData.error || errData.detail || 'Failed to create playlist', 'error');
@@ -309,6 +310,7 @@ class PlaylistMaker {
       window.toast.show(`Added ${selectedTrackIds.length} tracks to playlist sequence!`, 'success');
       this.closeTrackPickerModal();
       await this.loadPlaylists();
+      if (window.trackEvent) window.trackEvent('playlist_tracks_added', { count: selectedTrackIds.length });
     } catch (err) {
       window.toast.show('Error adding tracks to playlist', 'error');
     } finally {
@@ -444,6 +446,7 @@ class PlaylistMaker {
         window.toast.show('Continuous playlist track exported and saved to library!', 'success');
         await window.library.loadTracks();
         window.player.playTrack(data);
+        if (window.trackEvent) window.trackEvent('playlist_exported', { title: data.title });
       } else {
         const data = await response.json();
         window.toast.show(data.error || 'Export failed', 'error');

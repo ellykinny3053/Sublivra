@@ -183,7 +183,7 @@ class LibraryManager {
 
   downloadTrack(track) {
     if (!track || !track.file) return;
-    const fileUrl = track.file.startsWith('http') ? track.file : `http://127.0.0.1:8000${track.file}`;
+    const fileUrl = track.file.startsWith('http') ? track.file : track.file;
     const token = window.api.accessToken;
 
     fetch(fileUrl, {
@@ -200,6 +200,12 @@ class LibraryManager {
         a.click();
         a.remove();
         window.toast.show(`Downloading "${track.title}"...`, 'success');
+        if (window.trackEvent) {
+          window.trackEvent('track_downloaded', {
+            title: track.title,
+            source_type: track.source_type
+          });
+        }
       })
       .catch(err => {
         window.toast.show('Download failed', 'error');

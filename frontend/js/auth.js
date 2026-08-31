@@ -95,6 +95,7 @@ class AuthManager {
         window.toast.show('Logged in successfully', 'success');
         await this.fetchUserProfile();
         window.library.loadTracks();
+        if (window.trackEvent) window.trackEvent('user_logged_in');
       } else {
         window.toast.show(data.detail || 'Invalid email or password', 'error');
       }
@@ -136,6 +137,7 @@ class AuthManager {
           this.hideAuthModal();
           await this.fetchUserProfile();
           window.library.loadTracks();
+          if (window.trackEvent) window.trackEvent('user_registered', { username: username });
         }
       } else {
         const errorMsg = data.password || data.email || data.username || data.detail || 'Registration failed';

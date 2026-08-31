@@ -218,14 +218,7 @@ class MakeYourSubManager {
     window.toast.show('Uploading audio track from device...', 'info');
 
     try {
-      const token = window.api.accessToken;
-      const response = await fetch('http://127.0.0.1:8000/api/tracks/upload/', {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${token}`
-        },
-        body: formData
-      });
+      const response = await window.api.post('/tracks/upload/', formData);
 
       if (response.ok) {
         const track = await response.json();
@@ -233,6 +226,7 @@ class MakeYourSubManager {
         this.setBackgroundTrack(track);
         fileInput.value = '';
         await window.library.loadTracks();
+        if (window.trackEvent) window.trackEvent('base_track_uploaded', { format: track.format });
       } else {
         const err = await response.json();
         window.toast.show(err.detail || 'Upload failed', 'error');
@@ -368,6 +362,13 @@ class MakeYourSubManager {
 
         await window.library.loadTracks();
         this.updateExportButtonState();
+        if (window.trackEvent) {
+          window.trackEvent('affirmation_generated', {
+            voice: voice,
+            speed: speed,
+            text_length: text.length
+          });
+        }
       } else {
         const err = await response.json();
         window.toast.show(err.error || 'Affirmation generation failed', 'error');
@@ -539,6 +540,12 @@ class MakeYourSubManager {
 
         await window.library.loadTracks();
         window.player.playTrack(masterTrack);
+        if (window.trackEvent) {
+          window.trackEvent('subliminal_downloaded', {
+            title: masterTrack.title,
+            duration: masterTrack.duration
+          });
+        }
       } else {
         const err = await response.json();
         window.toast.show(err.error || 'Subliminal export failed', 'error');
