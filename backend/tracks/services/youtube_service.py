@@ -5,10 +5,38 @@ with mandatory rights confirmation.
 """
 import os
 import re
+import shutil
 import uuid
 
 import yt_dlp
 from django.conf import settings
+
+
+def _get_ffmpeg_path():
+    """
+    Find ffmpeg executable path across Linux/Docker/Windows environments.
+    Prioritizes system PATH (/usr/bin/ffmpeg) and falls back to imageio-ffmpeg binary.
+    """
+    # 1. System PATH
+    sys_ffmpeg = shutil.which('ffmpeg')
+    if sys_ffmpeg and os.path.exists(sys_ffmpeg):
+        return sys_ffmpeg
+
+    # 2. Standard Linux / Docker binary locations
+    for path in ['/usr/bin/ffmpeg', '/usr/local/bin/ffmpeg', '/bin/ffmpeg']:
+        if os.path.exists(path):
+            return path
+
+    # 3. imageio_ffmpeg bundled binary
+    try:
+        import imageio_ffmpeg
+        exe = imageio_ffmpeg.get_ffmpeg_exe()
+        if exe and os.path.exists(exe):
+            return exe
+    except Exception:
+        pass
+
+    return None
 
 
 # Regex patterns for valid YouTube URLs
@@ -166,26 +194,21 @@ def download_audio(url):
     filename = f"yt_{uuid.uuid4().hex[:12]}"
     output_template = os.path.join(output_dir, filename)
 
-    ffmpeg_dir = None
-    try:
-        import imageio_ffmpeg
-        ffmpeg_dir = os.path.dirname(imageio_ffmpeg.get_ffmpeg_exe())
-    except Exception:
-        pass
+    ffmpeg_exe = _get_ffmpeg_path()
 
     extra_opts = {
         'format': 'bestaudio/best',
         'outtmpl': output_template + '.%(ext)s',
-        'postprocessors': [{
-            'key': 'FFmpegExtractAudio',
-            'preferredcodec': 'mp3',
-            'preferredquality': '192',
-        }],
         'retries': 3,
         'max_filesize': 100 * 1024 * 1024,  # 100MB max
     }
-    if ffmpeg_dir:
-        extra_opts['ffmpeg_location'] = ffmpeg_dir
+    if ffmpeg_exe:
+        extra_opts['ffmpeg_location'] = ffmpeg_exe
+        extra_opts['postprocessors'] = [{
+            'key': 'FFmpegExtractAudio',
+            'preferredcodec': 'mp3',
+            'preferredquality': '192',
+        }]
 
     ydl_opts = _get_base_ydl_opts(extra_opts)
 
