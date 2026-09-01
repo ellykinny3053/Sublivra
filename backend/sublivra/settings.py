@@ -130,6 +130,9 @@ STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 # Media / Audio Storage (Cloudflare R2 / S3 in production or Local disk in dev)
 AWS_STORAGE_BUCKET_NAME = os.getenv('AWS_STORAGE_BUCKET_NAME', '')
 
+MEDIA_URL = '/media/'
+MEDIA_ROOT = BASE_DIR / 'media'
+
 if AWS_STORAGE_BUCKET_NAME:
     # Cloudflare R2 / AWS S3 Configuration
     AWS_ACCESS_KEY_ID = os.getenv('AWS_ACCESS_KEY_ID', '')
@@ -143,10 +146,17 @@ if AWS_STORAGE_BUCKET_NAME:
     
     DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
     MEDIA_URL = f"{AWS_S3_ENDPOINT_URL}/{AWS_STORAGE_BUCKET_NAME}/"
-else:
-    # Local disk media storage
-    MEDIA_URL = '/media/'
-    MEDIA_ROOT = BASE_DIR / 'media'
+
+# Audio Pipeline Configuration
+AUDIO_SETTINGS = {
+    'TTS_OUTPUT_DIR': 'audio/tts',
+    'EDITED_OUTPUT_DIR': 'audio/edited',
+    'MIXED_OUTPUT_DIR': 'audio/mixed',
+    'EXPORT_OUTPUT_DIR': 'audio/exports',
+    'YOUTUBE_OUTPUT_DIR': 'audio/youtube',
+    'ALLOWED_AUDIO_FORMATS': ['mp3', 'wav', 'flac', 'm4a', 'ogg', 'aac', 'webm'],
+    'DEFAULT_EXPORT_BITRATE': '192k',
+}
 
 # Default primary key field type
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'

@@ -204,12 +204,21 @@ class MixerSerializer(serializers.Serializer):
 
 class YouTubeMetadataSerializer(serializers.Serializer):
     """Serializer for YouTube metadata request."""
-    url = serializers.URLField()
+    url = serializers.URLField(required=False)
+    youtube_url = serializers.URLField(required=False)
+
+    def validate(self, attrs):
+        url = attrs.get('url') or attrs.get('youtube_url')
+        if not url:
+            raise serializers.ValidationError({"url": "A YouTube URL is required."})
+        attrs['url'] = url
+        return attrs
 
 
 class YouTubeImportSerializer(serializers.Serializer):
     """Serializer for YouTube audio import."""
-    url = serializers.URLField()
+    url = serializers.URLField(required=False)
+    youtube_url = serializers.URLField(required=False)
     rights_confirmed = serializers.BooleanField()
     license_info = serializers.CharField(required=False, default='', allow_blank=True)
     title = serializers.CharField(max_length=255, required=False, default='')
@@ -221,3 +230,10 @@ class YouTubeImportSerializer(serializers.Serializer):
                 "to download and use its audio."
             )
         return value
+
+    def validate(self, attrs):
+        url = attrs.get('url') or attrs.get('youtube_url')
+        if not url:
+            raise serializers.ValidationError({"url": "A YouTube URL is required."})
+        attrs['url'] = url
+        return attrs

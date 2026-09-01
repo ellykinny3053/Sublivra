@@ -195,23 +195,29 @@ class MakeYourSubManager {
 
     try {
       const response = await window.api.post('/tracks/youtube/import/', {
+        url: url,
         youtube_url: url,
         rights_confirmed: true,
         license_info: 'Make Your Own Sub YouTube Import'
       });
 
+      let track = {};
+      try {
+        track = await response.json();
+      } catch (e) {
+        track = { error: `Server error (${response.status})` };
+      }
+
       if (response.ok) {
-        const track = await response.json();
         window.toast.show(`YouTube audio "${track.title}" loaded as base track!`, 'success');
         this.setBackgroundTrack(track);
         urlInput.value = '';
         await window.library.loadTracks();
       } else {
-        const err = await response.json();
-        window.toast.show(err.error || 'YouTube download failed', 'error');
+        window.toast.show(track.error || track.detail || 'YouTube download failed', 'error');
       }
     } catch (err) {
-      window.toast.show('Error importing YouTube audio', 'error');
+      window.toast.show(err.message || 'Error importing YouTube audio', 'error');
     } finally {
       btn.disabled = false;
       btn.textContent = 'Import YouTube Audio';

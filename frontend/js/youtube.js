@@ -100,12 +100,18 @@ class YouTubeImporter {
     try {
       const response = await window.api.post('/tracks/youtube/import/', {
         url,
+        youtube_url: url,
         rights_confirmed: true,
         license_info: licenseInfo || 'Creator-verified audio',
         title: this.currentMetadata?.title || '',
       });
 
-      const data = await response.json();
+      let data = {};
+      try {
+        data = await response.json();
+      } catch (e) {
+        data = { error: `Server error (${response.status})` };
+      }
 
       if (response.ok) {
         window.toast.show('Audio imported successfully from YouTube into library!', 'success');
@@ -119,7 +125,7 @@ class YouTubeImporter {
         window.toast.show(msg, 'error', 6000);
       }
     } catch (err) {
-      window.toast.show('Network error while importing YouTube audio', 'error');
+      window.toast.show(err.message || 'Error importing YouTube audio', 'error');
     } finally {
       btn.disabled = false;
       btn.innerHTML = 'Import Audio to Library';
