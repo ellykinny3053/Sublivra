@@ -487,10 +487,20 @@ html.dark .nav-item.active button svg {
 
   /* --- Tab 2: Make Your Own Sub (TTS) on Mobile --- */
   /* Step 1 Header & Tabs */
-  #tab-tts .glass-card:first-child > div:first-child {
+  #tab-tts > div > .glass-card:first-child > div:first-child {
     flex-direction: column !important;
     align-items: stretch !important;
     gap: 12px !important;
+  }
+
+  .mys-vol-header {
+    display: flex !important;
+    flex-direction: row !important;
+    justify-content: space-between !important;
+    align-items: center !important;
+    margin-bottom: 10px !important;
+    gap: 10px !important;
+    width: 100% !important;
   }
 
   #tab-tts .mys-bg-tab-btn {
