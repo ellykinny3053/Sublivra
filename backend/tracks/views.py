@@ -65,7 +65,7 @@ class TrackDetailView(generics.RetrieveUpdateDestroyAPIView):
 
 
 class TrackStreamView(APIView):
-    """Stream audio track with full range header and cross-platform path support."""
+    """Stream audio track with full range header, cross-platform path support, and self-healing re-fetch."""
     permission_classes = (permissions.AllowAny,)
 
     def get(self, request, pk):
@@ -93,7 +93,40 @@ class TrackStreamView(APIView):
                 full_path = candidate
                 break
 
-        if not full_path:
+        # Self-healing: if file was cleared during Railway container restart, regenerate on-demand
+        if not full_path or not os.path.isfile(full_path):
+            if track.source_url and track.source_type == Track.SourceType.YOUTUBE_AUTHORIZED:
+                try:
+                    res = youtube_service.download_audio(track.source_url)
+                    new_file = str(res['file_path']).replace('\\', '/')
+                    track.file = new_file
+                    track.save(update_fields=['file'])
+                    candidate_paths = [
+                        os.path.join(settings.MEDIA_ROOT, new_file),
+                        os.path.join(settings.MEDIA_ROOT, 'audio', 'youtube', os.path.basename(new_file))
+                    ]
+                    for cp in candidate_paths:
+                        if os.path.isfile(cp):
+                            full_path = cp
+                            break
+                except Exception as e:
+                    import logging
+                    logging.getLogger(__name__).warning(f"Self-healing YouTube re-download failed: {e}")
+            elif track.source_type == Track.SourceType.TTS and track.tts_text:
+                try:
+                    res = tts_service.generate_tts_audio(
+                        text=track.tts_text,
+                        language=track.tts_language or 'en'
+                    )
+                    new_file = str(res['file_path']).replace('\\', '/')
+                    track.file = new_file
+                    track.save(update_fields=['file'])
+                    full_path = os.path.join(settings.MEDIA_ROOT, new_file)
+                except Exception as e:
+                    import logging
+                    logging.getLogger(__name__).warning(f"Self-healing TTS regeneration failed: {e}")
+
+        if not full_path or not os.path.isfile(full_path):
             return Response({'error': 'Audio file not found on server'}, status=status.HTTP_404_NOT_FOUND)
 
         content_type = 'audio/mpeg'
