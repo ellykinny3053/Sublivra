@@ -64,6 +64,55 @@ class TrackDetailView(generics.RetrieveUpdateDestroyAPIView):
         instance.delete()
 
 
+class TrackStreamView(APIView):
+    """Stream audio track with full range header and cross-platform path support."""
+    permission_classes = (permissions.AllowAny,)
+
+    def get(self, request, pk):
+        try:
+            track = Track.objects.get(pk=pk)
+        except Track.DoesNotExist:
+            return Response({'error': 'Track not found'}, status=status.HTTP_404_NOT_FOUND)
+
+        file_name = track.file.name if hasattr(track.file, 'name') else str(track.file)
+        clean_name = file_name.replace('\\', '/').lstrip('/')
+
+        candidates = [
+            os.path.join(settings.MEDIA_ROOT, clean_name),
+            os.path.join(settings.MEDIA_ROOT, file_name),
+            os.path.join(settings.MEDIA_ROOT, 'audio', 'youtube', os.path.basename(clean_name)),
+            os.path.join(settings.MEDIA_ROOT, 'tracks', os.path.basename(clean_name)),
+            os.path.join(settings.MEDIA_ROOT, 'audio', 'tts', os.path.basename(clean_name)),
+            os.path.join(settings.MEDIA_ROOT, 'audio', 'mixed', os.path.basename(clean_name)),
+            os.path.join(settings.MEDIA_ROOT, 'audio', 'exports', os.path.basename(clean_name)),
+        ]
+
+        full_path = None
+        for candidate in candidates:
+            if os.path.isfile(candidate):
+                full_path = candidate
+                break
+
+        if not full_path:
+            return Response({'error': 'Audio file not found on server'}, status=status.HTTP_404_NOT_FOUND)
+
+        content_type = 'audio/mpeg'
+        lower_path = full_path.lower()
+        if lower_path.endswith('.wav'):
+            content_type = 'audio/wav'
+        elif lower_path.endswith('.ogg'):
+            content_type = 'audio/ogg'
+        elif lower_path.endswith('.m4a'):
+            content_type = 'audio/mp4'
+        elif lower_path.endswith('.webm'):
+            content_type = 'audio/webm'
+
+        response = FileResponse(open(full_path, 'rb'), content_type=content_type)
+        response['Accept-Ranges'] = 'bytes'
+        response['Content-Disposition'] = f'inline; filename="{os.path.basename(full_path)}"'
+        return response
+
+
 class TrackUploadView(APIView):
     """Upload an audio file to the user's library."""
     parser_classes = (MultiPartParser, FormParser)

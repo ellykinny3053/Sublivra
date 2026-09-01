@@ -21,14 +21,25 @@ class TrackListSerializer(serializers.ModelSerializer):
     """Lightweight serializer for listing tracks."""
     tags = TagSerializer(many=True, read_only=True)
     duration_display = serializers.CharField(read_only=True)
+    stream_url = serializers.SerializerMethodField()
+    file = serializers.SerializerMethodField()
 
     class Meta:
         model = Track
         fields = (
-            'id', 'title', 'file', 'source_type', 'duration',
+            'id', 'title', 'file', 'stream_url', 'source_type', 'duration',
             'duration_display', 'file_size', 'format', 'tags',
             'created_at',
         )
+
+    def get_stream_url(self, obj):
+        return f"/api/tracks/{obj.id}/stream/"
+
+    def get_file(self, obj):
+        if not obj.file:
+            return ''
+        url = obj.file.url if hasattr(obj.file, 'url') else str(obj.file)
+        return url.replace('\\', '/')
 
 
 class TrackDetailSerializer(serializers.ModelSerializer):
@@ -36,17 +47,28 @@ class TrackDetailSerializer(serializers.ModelSerializer):
     tags = TagSerializer(many=True, read_only=True)
     duration_display = serializers.CharField(read_only=True)
     youtube_import = serializers.SerializerMethodField()
+    stream_url = serializers.SerializerMethodField()
+    file = serializers.SerializerMethodField()
 
     class Meta:
         model = Track
         fields = (
-            'id', 'title', 'file', 'source_type', 'source_url',
+            'id', 'title', 'file', 'stream_url', 'source_type', 'source_url',
             'duration', 'duration_display', 'file_size', 'format',
             'rights_confirmed', 'rights_confirmed_at', 'license_info',
             'tts_text', 'tts_language',
             'parent_track', 'tags', 'youtube_import',
             'created_at', 'updated_at',
         )
+
+    def get_stream_url(self, obj):
+        return f"/api/tracks/{obj.id}/stream/"
+
+    def get_file(self, obj):
+        if not obj.file:
+            return ''
+        url = obj.file.url if hasattr(obj.file, 'url') else str(obj.file)
+        return url.replace('\\', '/')
 
     def get_youtube_import(self, obj):
         if hasattr(obj, 'youtube_import'):

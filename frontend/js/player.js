@@ -136,20 +136,20 @@ class AudioPlayer {
   }
 
   playTrack(track) {
-    if (!track || !track.file) {
-      if (window.toast) window.toast.show('Track file not found', 'error');
+    if (!track) {
+      if (window.toast) window.toast.show('Track not found', 'error');
       return;
     }
 
     this.currentTrack = track;
-    let fileUrl = track.file;
+    let streamUrl = track.stream_url || (track.id ? `/api/tracks/${track.id}/stream/` : track.file);
 
     // Cross-origin and relative path resolution
-    if (!fileUrl.startsWith('http://') && !fileUrl.startsWith('https://')) {
-      fileUrl = fileUrl.startsWith('/') ? fileUrl : `/${fileUrl}`;
+    if (streamUrl && !streamUrl.startsWith('http://') && !streamUrl.startsWith('https://')) {
+      streamUrl = streamUrl.startsWith('/') ? streamUrl : `/${streamUrl}`;
     }
 
-    this.audio.src = fileUrl;
+    this.audio.src = streamUrl;
     if (this.volumeSlider) {
       this.audio.volume = parseFloat(this.volumeSlider.value || 0.85);
     }

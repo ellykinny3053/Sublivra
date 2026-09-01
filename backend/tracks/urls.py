@@ -3,7 +3,7 @@ URL patterns for tracks, TTS, audio editing, mixing, and YouTube import.
 """
 from django.urls import path
 from .views import (
-    TrackListView, TrackDetailView, TrackUploadView,
+    TrackListView, TrackDetailView, TrackUploadView, TrackStreamView,
     TTSLanguagesView, TTSGenerateView,
     TrimView, SpeedChangeView, FadeView, NormalizeView, AudioInfoView,
     MixerExportView,
@@ -13,10 +13,11 @@ from .views import (
 app_name = 'tracks'
 
 urlpatterns = [
-    # Track CRUD
+    # Track CRUD & Streaming
     path('', TrackListView.as_view(), name='track-list'),
     path('upload/', TrackUploadView.as_view(), name='track-upload'),
     path('<int:pk>/', TrackDetailView.as_view(), name='track-detail'),
+    path('<int:pk>/stream/', TrackStreamView.as_view(), name='track-stream'),
     path('<int:pk>/info/', AudioInfoView.as_view(), name='track-info'),
 
     # TTS
