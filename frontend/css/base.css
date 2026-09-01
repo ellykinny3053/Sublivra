@@ -521,7 +521,7 @@ html.dark .nav-item.active button svg {
 
   .mys-speed-chip {
     flex: 1 !important;
-    min-width: 54px !important;
+    min-width: 0 !important;
     text-align: center !important;
     padding: 4px 2px !important;
   }

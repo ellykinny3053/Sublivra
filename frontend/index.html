@@ -14,14 +14,14 @@
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-KZL331263Q"></script>
   <script>
     window.dataLayer = window.dataLayer || [];
-    function gtag(){dataLayer.push(arguments);}
+    function gtag() { dataLayer.push(arguments); }
     gtag('js', new Date());
 
     gtag('config', 'G-KZL331263Q');
   </script>
-  <link rel="stylesheet" href="/static/css/variables.css?v=18.0">
-  <link rel="stylesheet" href="/static/css/base.css?v=18.0">
-  <link rel="stylesheet" href="/static/css/components.css?v=18.0">
+  <link rel="stylesheet" href="/static/css/variables.css?v=19.0">
+  <link rel="stylesheet" href="/static/css/base.css?v=19.0">
+  <link rel="stylesheet" href="/static/css/components.css?v=19.0">
 </head>
 
 <body>
@@ -29,7 +29,8 @@
   <div class="app-container">
     <!-- Sidebar -->
     <aside class="sidebar" id="sidebar">
-      <div class="brand-logo" style="display: flex; align-items: center; justify-content: space-between; gap: 14px; padding: 0 8px 24px;">
+      <div class="brand-logo"
+        style="display: flex; align-items: center; justify-content: space-between; gap: 14px; padding: 0 8px 24px;">
         <div style="display: flex; align-items: center; gap: 12px;">
           <img src="/static/assets/logo.png?v=2.0" alt="Sublivra Logo"
             style="width: 44px; height: 36px; object-fit: contain; filter: drop-shadow(0 0 10px rgba(208, 188, 255, 0.45));">
@@ -111,14 +112,18 @@
         <div class="top-bar-main-row">
           <div style="display: flex; align-items: center; gap: 10px; min-width: 0; flex: 1;">
             <!-- Mobile Hamburger Toggle -->
-            <button type="button" class="btn-icon mobile-only" id="btn-mobile-sidebar-toggle" title="Open Navigation Menu"
+            <button type="button" class="btn-icon mobile-only" id="btn-mobile-sidebar-toggle"
+              title="Open Navigation Menu"
               style="width: 38px; height: 38px; border-radius: var(--radius-sm); flex-shrink: 0;">
               <span class="material-symbols-outlined" style="font-size: 24px; color: var(--text-primary);">menu</span>
             </button>
-            
+
             <div class="page-heading" style="overflow: hidden; min-width: 0;">
-              <h1 id="view-heading-title" style="font-size: 1.35rem; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Audio Library</h1>
-              <p id="view-heading-desc" style="font-size: 0.82rem; color: var(--text-muted);">Browse, manage, and play your
+              <h1 id="view-heading-title"
+                style="font-size: 1.35rem; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                Audio Library</h1>
+              <p id="view-heading-desc" style="font-size: 0.82rem; color: var(--text-muted);">Browse, manage, and play
+                your
                 generated, uploaded, and imported tracks</p>
             </div>
           </div>
@@ -286,7 +291,7 @@
                 <div style="display: flex; align-items: center; gap: 10px;">
                   <span
                     style="background: var(--accent-secondary); color: white; border-radius: 50%; width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.88rem;">2</span>
-                  <h3 style="font-size: 1.25rem; font-weight: 700;">Affirmations & Neural Voices (Male / Female &
+                  <h3 style="font-size: 1.25rem; font-weight: 700;">Affirmations (Male / Female &
                     Accents)</h3>
                 </div>
                 <p style="font-size: 0.85rem; color: var(--text-muted); margin-top: 4px;">
@@ -316,7 +321,7 @@
                     style="font-size: 0.78rem; border-radius: 20px;">💖 Glow Up & Magnetism</button>
                   <button type="button" class="btn btn-outline btn-sm"
                     onclick="window.tts.applyPresetAffirmations('focus')"
-                    style="font-size: 0.78rem; border-radius: 20px;">🧠 Laser Focus & Memory</button>
+                    style="font-size: 0.78rem; border-radius: 20px;">🧠 Focus & Memory</button>
                   <button type="button" class="btn btn-outline btn-sm"
                     onclick="window.tts.applyPresetAffirmations('calm')"
                     style="font-size: 0.78rem; border-radius: 20px;">🌙 Anxiety Release</button>
@@ -369,16 +374,16 @@
                     <input type="range" id="mys-speed-slider" min="0.5" max="4.0" step="0.1" value="1.0"
                       class="custom-range">
                     <div style="display: flex; justify-content: space-between; margin-top: 6px; gap: 4px;">
-                      <button type="button" class="mys-speed-chip btn btn-outline btn-sm" data-speed="1.0"
-                        style="padding: 2px 6px; font-size: 0.72rem;">1x Normal</button>
+                      <button type="button" class="mys-speed-chip btn btn-outline btn-sm active" data-speed="1.0"
+                        style="padding: 3px 6px; font-size: 0.75rem; flex: 1; text-align: center;">1x</button>
                       <button type="button" class="mys-speed-chip btn btn-outline btn-sm" data-speed="1.5"
-                        style="padding: 2px 6px; font-size: 0.72rem;">1.5x Fast</button>
+                        style="padding: 3px 6px; font-size: 0.75rem; flex: 1; text-align: center;">1.5x</button>
                       <button type="button" class="mys-speed-chip btn btn-outline btn-sm" data-speed="2.0"
-                        style="padding: 2px 6px; font-size: 0.72rem;">2x Speed</button>
+                        style="padding: 3px 6px; font-size: 0.75rem; flex: 1; text-align: center;">2x</button>
                       <button type="button" class="mys-speed-chip btn btn-outline btn-sm" data-speed="3.0"
-                        style="padding: 2px 6px; font-size: 0.72rem;">3x Subliminal</button>
+                        style="padding: 3px 6px; font-size: 0.75rem; flex: 1; text-align: center;">3x</button>
                       <button type="button" class="mys-speed-chip btn btn-outline btn-sm" data-speed="4.0"
-                        style="padding: 2px 6px; font-size: 0.72rem;">4x Ultra</button>
+                        style="padding: 3px 6px; font-size: 0.75rem; flex: 1; text-align: center;">4x</button>
                     </div>
                   </div>
                 </div>
@@ -1052,16 +1057,16 @@
     <div class="toast-container" id="toast-container"></div>
 
     <!-- Scripts with Cache Busting -->
-    <script src="/static/js/api.js?v=18.0"></script>
-    <script src="/static/js/player.js?v=18.0"></script>
-    <script src="/static/js/auth.js?v=18.0"></script>
-    <script src="/static/js/library.js?v=18.0"></script>
-    <script src="/static/js/tts.js?v=18.0"></script>
-    <script src="/static/js/editor.js?v=18.0"></script>
-    <script src="/static/js/mixer.js?v=18.0"></script>
-    <script src="/static/js/youtube.js?v=18.0"></script>
-    <script src="/static/js/bundles.js?v=18.0"></script>
-    <script src="/static/js/app.js?v=18.0"></script>
+    <script src="/static/js/api.js?v=19.0"></script>
+    <script src="/static/js/player.js?v=19.0"></script>
+    <script src="/static/js/auth.js?v=19.0"></script>
+    <script src="/static/js/library.js?v=19.0"></script>
+    <script src="/static/js/tts.js?v=19.0"></script>
+    <script src="/static/js/editor.js?v=19.0"></script>
+    <script src="/static/js/mixer.js?v=19.0"></script>
+    <script src="/static/js/youtube.js?v=19.0"></script>
+    <script src="/static/js/bundles.js?v=19.0"></script>
+    <script src="/static/js/app.js?v=19.0"></script>
 </body>
 
 </html>

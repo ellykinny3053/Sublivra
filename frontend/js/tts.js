@@ -69,20 +69,34 @@ class MakeYourSubManager {
     // Speed Slider listener
     const speedSlider = document.getElementById('mys-speed-slider');
     const speedVal = document.getElementById('mys-speed-val');
+    const speedPresets = document.querySelectorAll('.mys-speed-chip');
+
+    const updateActiveSpeedChip = (val) => {
+      speedPresets.forEach(chip => {
+        if (Math.abs(parseFloat(chip.dataset.speed) - val) < 0.05) {
+          chip.classList.add('active');
+        } else {
+          chip.classList.remove('active');
+        }
+      });
+    };
+
     if (speedSlider && speedVal) {
       speedSlider.addEventListener('input', (e) => {
-        speedVal.textContent = `${parseFloat(e.target.value).toFixed(1)}x`;
+        const val = parseFloat(e.target.value);
+        speedVal.textContent = `${val.toFixed(1)}x`;
+        updateActiveSpeedChip(val);
       });
     }
 
     // Speed Preset Chips
-    const speedPresets = document.querySelectorAll('.mys-speed-chip');
     speedPresets.forEach(chip => {
       chip.addEventListener('click', () => {
         const val = parseFloat(chip.dataset.speed);
         if (speedSlider) {
           speedSlider.value = val;
           speedVal.textContent = `${val.toFixed(1)}x`;
+          updateActiveSpeedChip(val);
         }
       });
     });
