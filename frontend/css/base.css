@@ -653,5 +653,65 @@ html.dark .nav-item.active button svg {
     flex: 1 !important;
     justify-content: center !important;
   }
+
+  /* Audio Player Dock on Mobile & Tablet */
+  .player-dock {
+    left: 50% !important;
+    transform: translateX(-50%) !important;
+    width: calc(100% - 20px) !important;
+    max-width: 480px !important;
+    bottom: 12px !important;
+    min-height: 64px !important;
+    padding: 8px 12px !important;
+    border-radius: 18px !important;
+    gap: 8px !important;
+    z-index: 9999 !important;
+  }
+
+  .player-dock.hidden {
+    transform: translate(-50%, 180%) !important;
+  }
+
+  .player-left {
+    width: auto !important;
+    min-width: 0 !important;
+    flex: 1 1 auto !important;
+    max-width: 130px !important;
+    gap: 8px !important;
+  }
+
+  .player-track-art {
+    width: 36px !important;
+    height: 36px !important;
+    border-radius: 8px !important;
+  }
+
+  .player-center {
+    flex: 2 1 auto !important;
+    max-width: none !important;
+    gap: 2px !important;
+  }
+
+  .play-main-btn {
+    width: 34px !important;
+    height: 34px !important;
+  }
+
+  .player-timeline-wrapper {
+    gap: 6px !important;
+  }
+
+  .player-time {
+    font-size: 0.65rem !important;
+    min-width: 28px !important;
+  }
+
+  .timeline-bar {
+    height: 5px !important;
+  }
+
+  .player-right {
+    display: none !important; /* Hide volume bar on mobile to keep layout clean; hardware volume works */
+  }
 }
 

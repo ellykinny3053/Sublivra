@@ -17,6 +17,10 @@ urlpatterns = [
     path('api/bundles/', include('bundles.urls')),
 ]
 
-# Serve media files during development
-if settings.DEBUG:
-    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+from django.urls import re_path
+from django.views.static import serve
+
+# Serve media files (audio tracks, exports, TTS, YouTube imports)
+urlpatterns += [
+    re_path(r'^media/(?P<path>.*)$', serve, {'document_root': settings.MEDIA_ROOT}),
+]
