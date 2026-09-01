@@ -47,6 +47,52 @@ def validate_youtube_url(url):
     )
 
 
+def _get_base_ydl_opts(extra_opts=None):
+    """
+    Build resilient yt-dlp options with multi-client fallbacks (Android/iOS/MWeb)
+    to prevent cloud datacenter IP bot blocks.
+    """
+    opts = {
+        'quiet': True,
+        'no_warnings': True,
+        'no_color': True,
+        'socket_timeout': 30,
+        'nocheckcertificate': True,
+        'geo_bypass': True,
+        'extractor_args': {
+            'youtube': {
+                'player_client': ['android', 'ios', 'mweb', 'web_creator', 'web'],
+            }
+        },
+        'http_headers': {
+            'User-Agent': 'com.google.android.youtube/19.29.37 (Linux; U; Android 11) gzip',
+            'Accept': '*/*',
+            'Accept-Language': 'en-US,en;q=0.9',
+        }
+    }
+
+    # Optional cookies authentication via environment variable
+    cookies_content = os.getenv('YOUTUBE_COOKIES_CONTENT', '').strip()
+    cookies_file = os.getenv('YOUTUBE_COOKIES_FILE', '').strip()
+
+    if cookies_content:
+        import tempfile
+        cookie_path = os.path.join(tempfile.gettempdir(), 'sublivra_yt_cookies.txt')
+        try:
+            with open(cookie_path, 'w', encoding='utf-8') as f:
+                f.write(cookies_content)
+            opts['cookiefile'] = cookie_path
+        except Exception:
+            pass
+    elif cookies_file and os.path.exists(cookies_file):
+        opts['cookiefile'] = cookies_file
+
+    if extra_opts:
+        opts.update(extra_opts)
+
+    return opts
+
+
 def get_video_metadata(url):
     """
     Fetch metadata for a YouTube video without downloading it.
@@ -61,12 +107,9 @@ def get_video_metadata(url):
     """
     video_id = validate_youtube_url(url)
 
-    ydl_opts = {
-        'quiet': True,
-        'no_warnings': True,
+    ydl_opts = _get_base_ydl_opts({
         'skip_download': True,
-        'no_color': True,
-    }
+    })
 
     try:
         with yt_dlp.YoutubeDL(ydl_opts) as ydl:
@@ -123,26 +166,28 @@ def download_audio(url):
     filename = f"yt_{uuid.uuid4().hex[:12]}"
     output_template = os.path.join(output_dir, filename)
 
-    import imageio_ffmpeg
-    ffmpeg_dir = os.path.dirname(imageio_ffmpeg.get_ffmpeg_exe())
+    ffmpeg_dir = None
+    try:
+        import imageio_ffmpeg
+        ffmpeg_dir = os.path.dirname(imageio_ffmpeg.get_ffmpeg_exe())
+    except Exception:
+        pass
 
-    ydl_opts = {
+    extra_opts = {
         'format': 'bestaudio/best',
         'outtmpl': output_template + '.%(ext)s',
-        'ffmpeg_location': ffmpeg_dir,
         'postprocessors': [{
             'key': 'FFmpegExtractAudio',
             'preferredcodec': 'mp3',
             'preferredquality': '192',
         }],
-        'quiet': True,
-        'no_warnings': True,
-        'no_color': True,
-        # Security & resource limits (M-2)
-        'socket_timeout': 30,
-        'retries': 2,
+        'retries': 3,
         'max_filesize': 100 * 1024 * 1024,  # 100MB max
     }
+    if ffmpeg_dir:
+        extra_opts['ffmpeg_location'] = ffmpeg_dir
+
+    ydl_opts = _get_base_ydl_opts(extra_opts)
 
     try:
         # Extract info dict during download
