@@ -527,31 +527,19 @@ html.dark .nav-item.active button svg {
   }
 
   /* Step 3: Live Preview & Export on Mobile */
-  #tab-tts .glass-card:nth-child(2) > div:nth-child(2) > div:first-child {
-    flex-direction: column !important;
-    align-items: stretch !important;
-    gap: 10px !important;
-  }
-
-  #tab-tts .glass-card:nth-child(2) > div:nth-child(2) > div:first-child > div:first-child {
-    display: flex !important;
-    width: 100% !important;
-    gap: 8px !important;
-  }
-
   #mys-preview-play-btn {
     flex: 1 !important;
+    min-width: 0 !important;
     justify-content: center !important;
   }
 
-  /* Volume Sliders Grid in Step 3 */
-  #tab-tts .glass-card:nth-child(2) > div:nth-child(2) > div:nth-child(2) {
-    grid-template-columns: 1fr !important;
-    gap: 12px !important;
+  #mys-preview-stop-btn {
+    flex-shrink: 0 !important;
+    justify-content: center !important;
   }
 
   /* Final Export Form Grid */
-  #tab-tts .glass-card:nth-child(2) > div:last-child {
+  #tab-tts .glass-card:last-child > div:last-child {
     grid-template-columns: 1fr !important;
     gap: 14px !important;
   }
