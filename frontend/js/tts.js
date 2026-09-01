@@ -267,7 +267,7 @@ class MakeYourSubManager {
 
     if (card && titleEl && metaEl) {
       titleEl.textContent = track.title;
-      metaEl.textContent = `⏱️ ${track.duration_display || '--:--'} • Source: ${track.source_type}`;
+      metaEl.textContent = `${track.duration_display || '--:--'} • Source: ${track.source_type}`;
       card.style.display = 'flex';
     }
 
@@ -364,7 +364,7 @@ class MakeYourSubManager {
 
         if (card && titleEl && metaEl) {
           titleEl.textContent = track.title;
-          metaEl.textContent = `⏱️ ${track.duration_display || '--:--'} • Neural Voice: ${voice.split('-')[2] || voice}`;
+          metaEl.textContent = `${track.duration_display || '--:--'} • Voice: ${voice.split('-')[2] || voice}`;
           card.style.display = 'flex';
         }
 
@@ -538,7 +538,7 @@ class MakeYourSubManager {
 
       if (response.ok) {
         const masterTrack = await response.json();
-        window.toast.show(`✨ Subliminal "${masterTrack.title}" created successfully!`, 'success');
+        window.toast.show(`Subliminal "${masterTrack.title}" created successfully!`, 'success');
 
         // Show Success Download Box
         const successBox = document.getElementById('mys-download-success-box');
@@ -568,7 +568,7 @@ class MakeYourSubManager {
       window.toast.show('Error creating subliminal track', 'error');
     } finally {
       btn.disabled = false;
-      btn.innerHTML = `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> ✨ Create & Download Complete Subliminal Track`;
+      btn.innerHTML = `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> Create & Download Subliminal`;
     }
   }
 }
