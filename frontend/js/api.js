@@ -72,11 +72,22 @@ class ApiClient {
     let response = await fetch(url, { ...options, headers });
 
     // Handle Token Expiry
-    if (response.status === 401 && this.refreshToken) {
-      const refreshed = await this.refreshAuthToken();
-      if (refreshed) {
-        headers['Authorization'] = `Bearer ${this.accessToken}`;
-        response = await fetch(url, { ...options, headers });
+    if (response.status === 401) {
+      if (this.refreshToken) {
+        const refreshed = await this.refreshAuthToken();
+        if (refreshed) {
+          headers['Authorization'] = `Bearer ${this.accessToken}`;
+          response = await fetch(url, { ...options, headers });
+        }
+      }
+
+      if (response.status === 401 && !endpoint.includes('/auth/')) {
+        if (window.auth && typeof window.auth.showAuthModal === 'function') {
+          window.auth.showAuthModal();
+          if (window.toast) {
+            window.toast.show('Please sign in or register to save tracks to your library', 'info');
+          }
+        }
       }
     }
 
