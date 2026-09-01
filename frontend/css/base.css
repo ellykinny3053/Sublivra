@@ -458,10 +458,14 @@ html.dark .nav-item.active button svg {
   }
 
   .content-viewport {
-    padding: 14px 12px 130px;
+    padding: 14px 12px 180px;
     max-width: 100vw;
     box-sizing: border-box;
     overflow-x: hidden;
+  }
+
+  .tab-pane {
+    padding-bottom: 40px;
   }
 
   .glass-card {

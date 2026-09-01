@@ -19,9 +19,9 @@
 
     gtag('config', 'G-KZL331263Q');
   </script>
-  <link rel="stylesheet" href="/static/css/variables.css?v=23.0">
-  <link rel="stylesheet" href="/static/css/base.css?v=23.0">
-  <link rel="stylesheet" href="/static/css/components.css?v=23.0">
+  <link rel="stylesheet" href="/static/css/variables.css?v=24.0">
+  <link rel="stylesheet" href="/static/css/base.css?v=24.0">
+  <link rel="stylesheet" href="/static/css/components.css?v=24.0">
 </head>
 
 <body>
@@ -478,14 +478,15 @@
               </div>
 
               <!-- Final Export Form -->
-              <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 20px; align-items: flex-end;">
+              <div class="mys-final-export-grid" style="display: flex; flex-direction: column; gap: 16px; margin-top: 20px;">
                 <div class="form-group" style="margin-bottom: 0;">
-                  <label class="form-label">Subliminal Track Title</label>
+                  <label class="form-label" style="font-weight: 600;">Subliminal Track Title</label>
                   <input type="text" id="mys-sub-title" class="form-input"
-                    placeholder="e.g. 528Hz Wealth & Supreme Confidence Subliminal">
-                  <div style="display: flex; align-items: center; gap: 8px; margin-top: 10px;">
+                    placeholder="e.g. 528Hz Wealth & Supreme Confidence Subliminal"
+                    style="width: 100%; box-sizing: border-box;">
+                  <div style="display: flex; align-items: center; gap: 10px; margin-top: 10px;">
                     <input type="checkbox" id="mys-loop-bg" checked
-                      style="width: 18px; height: 18px; accent-color: var(--accent-primary);">
+                      style="width: 18px; height: 18px; accent-color: var(--accent-primary); cursor: pointer; flex-shrink: 0;">
                     <label for="mys-loop-bg"
                       style="font-size: 0.85rem; color: var(--text-secondary); cursor: pointer;">Loop background audio
                       to match affirmations duration</label>
@@ -493,13 +494,13 @@
                 </div>
 
                 <button type="button" id="mys-final-export-btn" class="btn btn-primary"
-                  style="padding: 14px 20px; height: 48px; font-weight: 700; font-size: 0.95rem;">
+                  style="padding: 14px 20px; min-height: 48px; font-weight: 700; font-size: 0.95rem; width: 100%; justify-content: center;">
                   <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
                     <polyline points="7 10 12 15 17 10" />
                     <line x1="12" y1="15" x2="12" y2="3" />
                   </svg>
-                  ✨ Create & Download Complete Subliminal Track
+                  ✨ Create & Download Subliminal
                 </button>
               </div>
 
@@ -1047,16 +1048,16 @@
     <div class="toast-container" id="toast-container"></div>
 
     <!-- Scripts with Cache Busting -->
-    <script src="/static/js/api.js?v=23.0"></script>
-    <script src="/static/js/player.js?v=23.0"></script>
-    <script src="/static/js/auth.js?v=23.0"></script>
-    <script src="/static/js/library.js?v=23.0"></script>
-    <script src="/static/js/tts.js?v=23.0"></script>
-    <script src="/static/js/editor.js?v=23.0"></script>
-    <script src="/static/js/mixer.js?v=23.0"></script>
-    <script src="/static/js/youtube.js?v=23.0"></script>
-    <script src="/static/js/bundles.js?v=23.0"></script>
-    <script src="/static/js/app.js?v=23.0"></script>
+    <script src="/static/js/api.js?v=24.0"></script>
+    <script src="/static/js/player.js?v=24.0"></script>
+    <script src="/static/js/auth.js?v=24.0"></script>
+    <script src="/static/js/library.js?v=24.0"></script>
+    <script src="/static/js/tts.js?v=24.0"></script>
+    <script src="/static/js/editor.js?v=24.0"></script>
+    <script src="/static/js/mixer.js?v=24.0"></script>
+    <script src="/static/js/youtube.js?v=24.0"></script>
+    <script src="/static/js/bundles.js?v=24.0"></script>
+    <script src="/static/js/app.js?v=24.0"></script>
 </body>
 
 </html>
