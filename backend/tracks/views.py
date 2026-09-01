@@ -411,11 +411,13 @@ class YouTubeImportView(APIView):
             metadata = youtube_service.get_video_metadata(url)
         except (ValueError, RuntimeError) as e:
             return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+        except Exception as e:
+            return Response({'error': f"Failed to retrieve video metadata: {str(e)}"}, status=status.HTTP_400_BAD_REQUEST)
 
         # Download audio
         try:
             result = youtube_service.download_audio(url)
-        except RuntimeError as e:
+        except (ValueError, RuntimeError) as e:
             return Response(
                 {
                     'error': str(e),
@@ -423,38 +425,53 @@ class YouTubeImportView(APIView):
                 },
                 status=status.HTTP_400_BAD_REQUEST
             )
+        except Exception as e:
+            return Response({'error': f"Audio download failed: {str(e)}"}, status=status.HTTP_400_BAD_REQUEST)
 
-        # Create Track record
-        title = data.get('title') or metadata.get('title', 'YouTube Import')
-        track = Track.objects.create(
-            user=request.user,
-            title=title,
-            file=result['file_path'],
-            source_type=Track.SourceType.YOUTUBE_AUTHORIZED,
-            source_url=url,
-            duration=result['duration'],
-            file_size=result['file_size'],
-            format=result['format'],
-            rights_confirmed=True,
-            rights_confirmed_at=timezone.now(),
-            license_info=data.get('license_info', ''),
-        )
+        try:
+            # Create Track record
+            raw_title = data.get('title') or metadata.get('title') or 'YouTube Import'
+            title = str(raw_title)[:250]
+            
+            # Normalize file path with forward slashes for cross-platform FileField compatibility
+            file_path = str(result['file_path']).replace('\\', '/')
+            
+            track = Track.objects.create(
+                user=request.user,
+                title=title,
+                file=file_path,
+                source_type=Track.SourceType.YOUTUBE_AUTHORIZED,
+                source_url=str(url)[:500],
+                duration=result.get('duration'),
+                file_size=result.get('file_size'),
+                format=result.get('format', 'mp3'),
+                rights_confirmed=True,
+                rights_confirmed_at=timezone.now(),
+                license_info=str(data.get('license_info', ''))[:1000],
+            )
 
-        # Create YouTubeImport record
-        YouTubeImport.objects.create(
-            track=track,
-            youtube_url=url,
-            video_id=metadata.get('video_id', ''),
-            title=metadata.get('title', ''),
-            channel_name=metadata.get('channel_name', ''),
-            thumbnail_url=metadata.get('thumbnail_url', ''),
-            video_duration=metadata.get('duration'),
-            rights_confirmed=True,
-            confirmed_at=timezone.now(),
-            license_info=data.get('license_info', ''),
-        )
+            # Create YouTubeImport record
+            YouTubeImport.objects.create(
+                track=track,
+                youtube_url=str(url)[:500],
+                video_id=str(metadata.get('video_id', ''))[:20],
+                title=str(metadata.get('title', title))[:490],
+                channel_name=str(metadata.get('channel_name', ''))[:250],
+                thumbnail_url=str(metadata.get('thumbnail_url', ''))[:490],
+                video_duration=metadata.get('duration'),
+                rights_confirmed=True,
+                confirmed_at=timezone.now(),
+                license_info=str(data.get('license_info', ''))[:1000],
+            )
 
-        return Response(
-            TrackDetailSerializer(track).data,
-            status=status.HTTP_201_CREATED
-        )
+            return Response(
+                TrackDetailSerializer(track).data,
+                status=status.HTTP_201_CREATED
+            )
+        except Exception as e:
+            import logging
+            logging.getLogger(__name__).exception("Failed to save imported YouTube track record")
+            return Response(
+                {'error': f"Database save failed: {str(e)}"},
+                status=status.HTTP_400_BAD_REQUEST
+            )
