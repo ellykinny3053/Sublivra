@@ -16,6 +16,7 @@ from django.conf import settings
 from tracks.models import Track
 from tracks.serializers import TrackDetailSerializer
 from tracks.services import mixer_service
+from tracks.services.track_resolver import resolve_tracks_files
 
 from .models import Bundle, BundleTrack, Playlist, PlaylistTrack
 from .serializers import (
@@ -147,6 +148,12 @@ class BundleExportView(APIView):
     permission_classes = (permissions.IsAuthenticated,)
 
     def get(self, request, pk):
+        return self._export(request, pk)
+
+    def post(self, request, pk):
+        return self._export(request, pk)
+
+    def _export(self, request, pk):
         try:
             bundle = Bundle.objects.get(id=pk, user=request.user)
         except Bundle.DoesNotExist:
@@ -158,6 +165,16 @@ class BundleExportView(APIView):
                 {'error': 'Bundle has no tracks to layer.'},
                 status=status.HTTP_400_BAD_REQUEST
             )
+
+        tracks = [bt.track for bt in bundle_tracks if bt.track]
+        if not tracks:
+            return Response({'error': 'No valid tracks found in bundle.'}, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            resolved_paths = resolve_tracks_files(tracks, max_workers=4, auto_heal=True)
+            path_map = {t.id: p for t, p in zip(tracks, resolved_paths)}
+        except Exception as e:
+            return Response({'error': f"Failed to prepare audio files: {str(e)}"}, status=status.HTTP_400_BAD_REQUEST)
 
         query_params = getattr(request, 'query_params', request.GET)
         export_format = query_params.get('format', 'audio').lower()
@@ -171,13 +188,11 @@ class BundleExportView(APIView):
 
             with zipfile.ZipFile(zip_path, 'w', zipfile.ZIP_DEFLATED) as zf:
                 for bt in bundle_tracks:
-                    track = bt.track
-                    if track.file:
-                        full_path = os.path.join(settings.MEDIA_ROOT, track.file.name)
-                        if os.path.exists(full_path):
-                            ext = os.path.splitext(track.file.name)[1]
-                            arc_name = f"{bt.order_index:02d}_{track.title}{ext}"
-                            zf.write(full_path, arc_name)
+                    full_path = path_map.get(bt.track.id)
+                    if full_path and os.path.exists(full_path):
+                        ext = os.path.splitext(full_path)[1]
+                        arc_name = f"{bt.order_index:02d}_{bt.track.title}{ext}"
+                        zf.write(full_path, arc_name)
 
             response = FileResponse(open(zip_path, 'rb'), content_type='application/zip')
             response['Content-Disposition'] = f'attachment; filename="{zip_filename}"'
@@ -186,10 +201,10 @@ class BundleExportView(APIView):
         # Default Subliminal Bundle: Layer and play all subliminal tracks simultaneously
         track_configs = []
         for bt in bundle_tracks:
-            track = bt.track
-            if track.file:
+            full_path = path_map.get(bt.track.id)
+            if full_path and os.path.exists(full_path):
                 track_configs.append({
-                    'file_path': track.file.name,
+                    'file_path': full_path,
                     'volume': 0,
                     'offset_ms': 0,
                 })
@@ -202,6 +217,10 @@ class BundleExportView(APIView):
             result = mixer_service.mix_tracks(track_configs, loop_shorter=loop_shorter)
         except (ValueError, FileNotFoundError) as e:
             return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+        except Exception as e:
+            import logging
+            logging.getLogger(__name__).exception("Bundle export failed")
+            return Response({'error': f"Bundle export failed: {str(e)}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
         # Create Track record for the layered subliminal bundle
         export_track = Track.objects.create(
@@ -212,6 +231,7 @@ class BundleExportView(APIView):
             duration=result['duration'],
             file_size=result['file_size'],
             format=result['format'],
+            rights_confirmed=True,
         )
 
         return Response(
@@ -361,6 +381,12 @@ class PlaylistExportView(APIView):
     permission_classes = (permissions.IsAuthenticated,)
 
     def get(self, request, pk):
+        return self._export(request, pk)
+
+    def post(self, request, pk):
+        return self._export(request, pk)
+
+    def _export(self, request, pk):
         try:
             playlist = Playlist.objects.get(id=pk, user=request.user)
         except Playlist.DoesNotExist:
@@ -373,20 +399,32 @@ class PlaylistExportView(APIView):
                 status=status.HTTP_400_BAD_REQUEST
             )
 
-        file_paths = [pt.track.file.name for pt in playlist_tracks if pt.track.file]
-
-        if not file_paths:
+        tracks = [pt.track for pt in playlist_tracks if pt.track]
+        if not tracks:
             return Response(
-                {'error': 'No valid audio files found in playlist.'},
+                {'error': 'No valid audio tracks found in playlist.'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        # Self-heal and resolve all audio files (re-downloads missing ephemeral YouTube/TTS files in parallel)
+        try:
+            resolved_paths = resolve_tracks_files(tracks, max_workers=4, auto_heal=True)
+        except Exception as e:
+            return Response(
+                {'error': f"Failed to prepare audio files: {str(e)}"},
                 status=status.HTTP_400_BAD_REQUEST
             )
 
         try:
             query_params = getattr(request, 'query_params', request.GET)
             crossfade = int(query_params.get('crossfade_ms', 0))
-            result = mixer_service.concatenate_tracks(file_paths, crossfade_ms=crossfade)
+            result = mixer_service.concatenate_tracks(resolved_paths, crossfade_ms=crossfade)
         except (ValueError, FileNotFoundError) as e:
             return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+        except Exception as e:
+            import logging
+            logging.getLogger(__name__).exception("Playlist export failed")
+            return Response({'error': f"Playlist export failed: {str(e)}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
         # Create a Track record for the export
         export_track = Track.objects.create(
@@ -397,6 +435,7 @@ class PlaylistExportView(APIView):
             duration=result['duration'],
             file_size=result['file_size'],
             format=result['format'],
+            rights_confirmed=True,
         )
 
         return Response(

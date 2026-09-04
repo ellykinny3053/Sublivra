@@ -22,6 +22,7 @@ from .serializers import (
     YouTubeMetadataSerializer, YouTubeImportSerializer,
 )
 from .services import tts_service, audio_editor, mixer_service, youtube_service
+from .services.track_resolver import resolve_track_file_path, resolve_tracks_files
 
 
 # ── Track CRUD Views ─────────────────────────────────────────────────────────
@@ -74,60 +75,10 @@ class TrackStreamView(APIView):
         except Track.DoesNotExist:
             return Response({'error': 'Track not found'}, status=status.HTTP_404_NOT_FOUND)
 
-        file_name = track.file.name if hasattr(track.file, 'name') else str(track.file)
-        clean_name = file_name.replace('\\', '/').lstrip('/')
-
-        candidates = [
-            os.path.join(settings.MEDIA_ROOT, clean_name),
-            os.path.join(settings.MEDIA_ROOT, file_name),
-            os.path.join(settings.MEDIA_ROOT, 'audio', 'youtube', os.path.basename(clean_name)),
-            os.path.join(settings.MEDIA_ROOT, 'tracks', os.path.basename(clean_name)),
-            os.path.join(settings.MEDIA_ROOT, 'audio', 'tts', os.path.basename(clean_name)),
-            os.path.join(settings.MEDIA_ROOT, 'audio', 'mixed', os.path.basename(clean_name)),
-            os.path.join(settings.MEDIA_ROOT, 'audio', 'exports', os.path.basename(clean_name)),
-        ]
-
-        full_path = None
-        for candidate in candidates:
-            if os.path.isfile(candidate):
-                full_path = candidate
-                break
-
-        # Self-healing: if file was cleared during Railway container restart, regenerate on-demand
-        if not full_path or not os.path.isfile(full_path):
-            if track.source_url and track.source_type == Track.SourceType.YOUTUBE_AUTHORIZED:
-                try:
-                    res = youtube_service.download_audio(track.source_url)
-                    new_file = str(res['file_path']).replace('\\', '/')
-                    track.file = new_file
-                    track.save(update_fields=['file'])
-                    candidate_paths = [
-                        os.path.join(settings.MEDIA_ROOT, new_file),
-                        os.path.join(settings.MEDIA_ROOT, 'audio', 'youtube', os.path.basename(new_file))
-                    ]
-                    for cp in candidate_paths:
-                        if os.path.isfile(cp):
-                            full_path = cp
-                            break
-                except Exception as e:
-                    import logging
-                    logging.getLogger(__name__).warning(f"Self-healing YouTube re-download failed: {e}")
-            elif track.source_type == Track.SourceType.TTS and track.tts_text:
-                try:
-                    res = tts_service.generate_tts_audio(
-                        text=track.tts_text,
-                        language=track.tts_language or 'en'
-                    )
-                    new_file = str(res['file_path']).replace('\\', '/')
-                    track.file = new_file
-                    track.save(update_fields=['file'])
-                    full_path = os.path.join(settings.MEDIA_ROOT, new_file)
-                except Exception as e:
-                    import logging
-                    logging.getLogger(__name__).warning(f"Self-healing TTS regeneration failed: {e}")
-
-        if not full_path or not os.path.isfile(full_path):
-            return Response({'error': 'Audio file not found on server'}, status=status.HTTP_404_NOT_FOUND)
+        try:
+            full_path = resolve_track_file_path(track, auto_heal=True)
+        except Exception as e:
+            return Response({'error': f"Audio file not found on server: {str(e)}"}, status=status.HTTP_404_NOT_FOUND)
 
         content_type = 'audio/mpeg'
         lower_path = full_path.lower()
@@ -417,7 +368,7 @@ class MixerExportView(APIView):
         serializer.is_valid(raise_exception=True)
         data = serializer.validated_data
 
-        # Resolve track IDs to file paths
+        # Resolve track IDs to file paths and self-heal if missing on disk
         track_configs = []
         for cfg in data['tracks']:
             try:
@@ -427,8 +378,15 @@ class MixerExportView(APIView):
                     {'error': f"Track {cfg['track_id']} not found."},
                     status=status.HTTP_404_NOT_FOUND
                 )
+            try:
+                full_path = resolve_track_file_path(track, auto_heal=True)
+            except Exception as e:
+                return Response(
+                    {'error': f"Could not resolve track '{track.title}': {str(e)}"},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
             track_configs.append({
-                'file_path': track.file.name,
+                'file_path': full_path,
                 'volume': cfg.get('volume', 0),
                 'offset_ms': cfg.get('offset_ms', 0),
             })
@@ -440,6 +398,8 @@ class MixerExportView(APIView):
             )
         except (ValueError, FileNotFoundError) as e:
             return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+        except Exception as e:
+            return Response({'error': f"Mixing failed: {str(e)}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
         # Create mixed track
         track = Track.objects.create(

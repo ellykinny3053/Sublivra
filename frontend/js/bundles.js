@@ -113,7 +113,7 @@ class PlaylistMaker {
                 <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 11 12 14 22 4"></polyline><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path></svg>
                 + Add Tracks 
               </button>
-              <button class="btn btn-primary btn-sm" onclick="window.bundles.exportPlaylistAudio(${pl.id})" ${tracks.length === 0 ? 'disabled' : ''} style="padding: 8px 14px;" title="Merge all tracks in sequence into one single continuous audio file">
+              <button id="btn-export-playlist-${pl.id}" class="btn btn-primary btn-sm" onclick="window.bundles.exportPlaylistAudio(${pl.id}, this)" ${tracks.length === 0 ? 'disabled' : ''} style="padding: 8px 14px;" title="Merge all tracks in sequence into one single continuous audio file">
                 <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>
                 Export Continuous Track
               </button>
@@ -131,7 +131,7 @@ class PlaylistMaker {
                 Track Playback Order
               </span>
               <span style="font-size: 0.75rem; color: var(--text-muted);">
-                💡 <em>Drag the handle (⠿) or use ▲ ▼ to dynamically reorder</em>
+                <em>Drag handle (⠿) or use ▲ ▼ to reorder</em>
               </span>
             </div>
 
@@ -166,7 +166,7 @@ class PlaylistMaker {
                           ${escapeHtmlBundles(t.title) || 'Track'}
                         </span>
                         <div style="display: flex; align-items: center; gap: 8px; font-size: 0.76rem; color: var(--text-muted); margin-top: 2px;">
-                          <span>⏱️ ${t.duration_display || '--:--'}</span>
+                          <span>${t.duration_display || '--:--'}</span>
                           <span>•</span>
                           <span class="badge badge-${escapeHtmlBundles(t.source_type)}" style="font-size: 0.68rem; padding: 1px 6px;">${escapeHtmlBundles(t.source_type)}</span>
                         </div>
@@ -263,7 +263,7 @@ class PlaylistMaker {
                 <span style="font-weight: 600; font-size: 0.95rem; color: var(--text-primary);">${escapeHtmlBundles(t.title)}</span>
                 ${alreadyIn ? '<span class="badge badge-mixed" style="font-size: 0.65rem;">Already in Playlist</span>' : ''}
               </div>
-              <span style="font-size: 0.78rem; color: var(--text-muted); margin-top: 2px; display: block;">⏱️ ${t.duration_display || '--:--'} • Source: ${escapeHtmlBundles(t.source_type)}</span>
+              <span style="font-size: 0.78rem; color: var(--text-muted); margin-top: 2px; display: block;">${t.duration_display || '--:--'} • Source: ${escapeHtmlBundles(t.source_type)}</span>
             </div>
           </label>
         `;
@@ -437,22 +437,45 @@ class PlaylistMaker {
     }
   }
 
-  async exportPlaylistAudio(playlistId) {
+  async exportPlaylistAudio(playlistId, triggerBtn) {
+    const btn = triggerBtn || document.getElementById(`btn-export-playlist-${playlistId}`);
+    const originalContent = btn ? btn.innerHTML : '';
+
+    if (btn) {
+      btn.disabled = true;
+      btn.innerHTML = `
+        <span style="display:inline-block; width:13px; height:13px; border:2px solid #ffffff; border-top-color:transparent; border-radius:50%; animation:spin 0.8s linear infinite; margin-right:6px; vertical-align:middle;"></span>
+        Merging Track...
+      `;
+    }
+
     try {
-      window.toast.show('Merging playlist tracks sequentially into one single continuous audio file...', 'info');
+      window.toast.show('Merging playlist tracks into continuous audio file. Please wait...', 'info', 7000);
       const response = await window.api.get(`/bundles/playlists/${playlistId}/export/`);
-      if (response.ok) {
-        const data = await response.json();
+      let data = null;
+      try {
+        data = await response.json();
+      } catch (parseErr) {
+        data = null;
+      }
+
+      if (response.ok && data) {
         window.toast.show('Continuous playlist track exported and saved to library!', 'success');
-        await window.library.loadTracks();
-        window.player.playTrack(data);
+        if (window.library?.loadTracks) await window.library.loadTracks();
+        if (window.player?.playTrack) window.player.playTrack(data);
         if (window.trackEvent) window.trackEvent('playlist_exported', { title: data.title });
       } else {
-        const data = await response.json();
-        window.toast.show(data.error || 'Export failed', 'error');
+        const errorMsg = data?.error || data?.detail || data?.message || (response.status === 401 ? 'Please sign in to export playlist' : 'Export failed');
+        window.toast.show(errorMsg, 'error', 6000);
       }
     } catch (err) {
-      window.toast.show('Error exporting playlist audio', 'error');
+      console.error('Export playlist audio error:', err);
+      window.toast.show('Error exporting playlist audio. Please check connection.', 'error');
+    } finally {
+      if (btn) {
+        btn.disabled = false;
+        btn.innerHTML = originalContent;
+      }
     }
   }
 
