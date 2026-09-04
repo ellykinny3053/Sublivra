@@ -120,8 +120,8 @@ class AudioMixer {
         <div class="mixer-layer-controls-grid" style="display: grid; grid-template-columns: 2fr 1.2fr 1fr; gap: 16px; align-items: center;">
           <!-- Track Select -->
           <div>
-            <label class="form-label" style="font-size: 0.75rem; margin-bottom: 4px;">Audio Source</label>
-            <select class="form-select layer-track-select" onchange="window.mixer.updateLayerTrack(${layer.id}, this.value)">
+            <label for="layer-track-${layer.id}" class="form-label" style="font-size: 0.75rem; margin-bottom: 4px;">Audio Source</label>
+            <select id="layer-track-${layer.id}" class="form-select layer-track-select" aria-label="Layer ${idx + 1} Audio Source" onchange="window.mixer.updateLayerTrack(${layer.id}, this.value)">
               <option value="">-- Choose Audio Track --</option>
               ${(window.library?.tracks || []).map(t => `
                 <option value="${t.id}" ${layer.trackId == t.id ? 'selected' : ''}>${t.title} (${t.duration_display})</option>
@@ -132,20 +132,20 @@ class AudioMixer {
           <!-- Live Real-Time Volume -->
           <div>
             <div style="display: flex; justify-content: space-between; font-size: 0.75rem; color: var(--text-muted); margin-bottom: 4px;">
-              <span>Real-Time Volume</span>
+              <label for="vol-slider-${layer.id}" style="font-size: 0.75rem; color: inherit; margin-bottom: 0;">Real-Time Volume</label>
               <span id="vol-val-${layer.id}" style="font-family: var(--font-mono); color: var(--text-accent); font-weight: 600;">${layer.volume > 0 ? '+' : ''}${layer.volume} dB</span>
             </div>
-            <input type="range" min="-24" max="10" step="0.5" value="${layer.volume}" class="custom-range"
+            <input type="range" id="vol-slider-${layer.id}" min="-24" max="10" step="0.5" value="${layer.volume}" class="custom-range" aria-label="Layer ${idx + 1} Volume"
               oninput="window.mixer.updateLayerVolume(${layer.id}, this.value)">
           </div>
 
           <!-- Time Offset (Delay) -->
           <div>
             <div style="display: flex; justify-content: space-between; font-size: 0.75rem; color: var(--text-muted); margin-bottom: 4px;">
-              <span>Start Delay</span>
+              <label for="offset-slider-${layer.id}" style="font-size: 0.75rem; color: inherit; margin-bottom: 0;">Start Delay</label>
               <span id="offset-val-${layer.id}" style="font-family: var(--font-mono); color: var(--accent-secondary); font-weight: 600;">${layer.offsetSec}s</span>
             </div>
-            <input type="range" min="0" max="30" step="0.5" value="${layer.offsetSec}" class="custom-range"
+            <input type="range" id="offset-slider-${layer.id}" min="0" max="30" step="0.5" value="${layer.offsetSec}" class="custom-range" aria-label="Layer ${idx + 1} Start Delay"
               oninput="window.mixer.updateLayerOffset(${layer.id}, this.value)">
           </div>
         </div>
