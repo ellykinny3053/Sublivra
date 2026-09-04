@@ -28,5 +28,4 @@ WORKDIR /app/backend
 ENV PORT=8000
 EXPOSE 8000
 
-# Collect static files, run migrations, and start Gunicorn server
-CMD ["sh", "-c", "python manage.py collectstatic --no-input && python manage.py migrate && gunicorn sublivra.wsgi:application --bind 0.0.0.0:${PORT:-8000} --workers 3 --threads 4 --timeout 180 --worker-class gthread"]
+CMD ["sh", "-c", "python manage.py collectstatic --no-input && python manage.py migrate && gunicorn sublivra.wsgi:application --bind 0.0.0.0:${PORT:-8000} --workers 3 --threads 4 --timeout 300 --worker-class gthread"]

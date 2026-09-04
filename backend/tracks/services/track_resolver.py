@@ -33,6 +33,9 @@ def resolve_track_file_path(track, auto_heal=True):
     if clean_name:
         candidates.append(os.path.join(settings.MEDIA_ROOT, clean_name))
         candidates.append(os.path.join(settings.MEDIA_ROOT, file_name))
+        if clean_name.startswith('media/'):
+            candidates.append(os.path.join(settings.MEDIA_ROOT, clean_name[6:]))
+        candidates.append(os.path.join(str(settings.BASE_DIR), clean_name))
         base = os.path.basename(clean_name)
         candidates.extend([
             os.path.join(settings.MEDIA_ROOT, 'audio', 'youtube', base),
@@ -40,6 +43,7 @@ def resolve_track_file_path(track, auto_heal=True):
             os.path.join(settings.MEDIA_ROOT, 'audio', 'tts', base),
             os.path.join(settings.MEDIA_ROOT, 'audio', 'mixed', base),
             os.path.join(settings.MEDIA_ROOT, 'audio', 'exports', base),
+            os.path.join(settings.MEDIA_ROOT, 'audio', 'edited', base),
         ])
         if os.path.isabs(clean_name):
             candidates.append(clean_name)
@@ -51,14 +55,27 @@ def resolve_track_file_path(track, auto_heal=True):
 
     # Self-healing if missing on disk
     if auto_heal:
-        if track.source_url and track.source_type == Track.SourceType.YOUTUBE_AUTHORIZED:
+        source_url = track.source_url
+        if not source_url:
+            yt_imp = getattr(track, 'youtube_import', None)
+            if yt_imp and hasattr(yt_imp, 'youtube_url'):
+                source_url = yt_imp.youtube_url
+
+        is_youtube = (
+            track.source_type == Track.SourceType.YOUTUBE_AUTHORIZED
+            or (source_url and ('youtube.com' in source_url or 'youtu.be' in source_url))
+        )
+
+        if source_url and is_youtube:
             logger.info(f"Self-healing: Re-downloading missing YouTube audio for track '{track.title}' (ID {track.id})")
             try:
                 from tracks.services import youtube_service
-                res = youtube_service.download_audio(track.source_url)
+                res = youtube_service.download_audio(source_url)
                 new_file = str(res['file_path']).replace('\\', '/')
                 track.file = new_file
-                track.save(update_fields=['file'])
+                if not track.source_url:
+                    track.source_url = source_url
+                track.save(update_fields=['file', 'source_url'])
 
                 check_paths = [
                     os.path.join(settings.MEDIA_ROOT, new_file),
@@ -93,57 +110,81 @@ def resolve_track_file_path(track, auto_heal=True):
     raise FileNotFoundError(f"Audio file for track '{track.title}' (ID {track.id}) not found on server.")
 
 
-def resolve_tracks_files(tracks, auto_heal=True, allow_skip=True):
+def resolve_tracks_files(tracks, auto_heal=True, allow_skip=True, max_workers=5):
     """
     Resolve and self-heal a list of tracks in sequence.
-    If an individual track cannot be recovered (e.g. YouTube video was removed/private),
-    allow_skip=True records it in skipped_tracks rather than aborting the entire export.
+    Uses concurrent ThreadPoolExecutor for missing files so 10+ tracks heal in parallel
+    (30-45s) instead of sequentially blocking for minutes and timing out.
 
     Args:
         tracks: List of Track model instances.
         auto_heal: Whether to re-download missing files.
         allow_skip: Whether to skip dead/unavailable tracks gracefully.
+        max_workers: Number of concurrent download workers (default 5).
 
     Returns:
         tuple[list[tuple[Track, str]], list[str]]:
-            - valid_items: list of (track, absolute_file_path)
+            - valid_items: list of (track, absolute_file_path) in original sequence order
             - skipped_tracks: list of track title strings that were unrecoverable
     """
     if not tracks:
         return [], []
 
-    valid_items = []
-    skipped_tracks = []
+    path_map = {}
+    missing_tracks = []
 
+    # Phase 1: Instant local disk check for all tracks
     for t in tracks:
-        # 1. Fast check: is file already on disk?
         try:
             path = resolve_track_file_path(t, auto_heal=False)
             if path and os.path.isfile(path):
-                valid_items.append((t, path))
+                path_map[t.id] = path
                 continue
         except FileNotFoundError:
             pass
+        missing_tracks.append(t)
 
-        # 2. Re-download / regenerate if auto_heal enabled
-        if auto_heal:
+    # Phase 2: Concurrent auto-heal for any tracks not already on disk
+    if auto_heal and missing_tracks:
+        logger.info(f"Auto-healing {len(missing_tracks)} missing audio tracks concurrently (workers={max_workers})...")
+        from concurrent.futures import ThreadPoolExecutor, as_completed
+
+        def heal_single_track(track):
             try:
-                path = resolve_track_file_path(t, auto_heal=True)
+                path = resolve_track_file_path(track, auto_heal=True)
                 if path and os.path.isfile(path):
-                    valid_items.append((t, path))
-                    # Brief pause between YouTube downloads to avoid cloud IP rate limiting
-                    if t.source_type == Track.SourceType.YOUTUBE_AUTHORIZED:
-                        time.sleep(0.3)
-                    continue
+                    return track.id, path, None
+                return track.id, None, "File not found after healing"
             except Exception as e:
-                logger.warning(f"Track '{t.title}' could not be resolved: {e}")
+                return track.id, None, str(e)
 
-        # 3. Track could not be found or downloaded
-        title = t.title or f"Track {t.id}"
-        if allow_skip:
-            skipped_tracks.append(title)
-            logger.info(f"Skipping unrecoverable track '{title}' for export.")
+        workers = min(len(missing_tracks), max_workers)
+        with ThreadPoolExecutor(max_workers=workers) as executor:
+            future_to_track = {executor.submit(heal_single_track, t): t for t in missing_tracks}
+            for future in as_completed(future_to_track):
+                t = future_to_track[future]
+                try:
+                    tid, path, err = future.result()
+                    if path:
+                        path_map[tid] = path
+                    else:
+                        logger.warning(f"Auto-heal failed for track '{t.title}': {err}")
+                except Exception as exc:
+                    logger.warning(f"Auto-heal raised unexpected error for '{t.title}': {exc}")
+
+    # Phase 3: Construct valid_items preserving EXACT original playlist sequence
+    valid_items = []
+    skipped_tracks = []
+    for t in tracks:
+        if t.id in path_map:
+            valid_items.append((t, path_map[t.id]))
         else:
-            raise FileNotFoundError(f"Missing audio for track '{title}' and could not be recovered.")
+            title = t.title or f"Track {t.id}"
+            if allow_skip:
+                skipped_tracks.append(title)
+                logger.info(f"Skipping unrecoverable track '{title}' for export.")
+            else:
+                raise FileNotFoundError(f"Missing audio for track '{title}' and could not be recovered.")
 
     return valid_items, skipped_tracks
+

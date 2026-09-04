@@ -199,6 +199,7 @@ def concatenate_tracks(file_paths, crossfade_ms=0):
             cmd = [
                 ffmpeg_exe,
                 '-y',
+                '-threads', '0',
                 '-f', 'concat',
                 '-safe', '0',
                 '-i', concat_list_path,
@@ -209,7 +210,7 @@ def concatenate_tracks(file_paths, crossfade_ms=0):
                 full_path
             ]
             logger.info(f"Running high-performance FFmpeg concat for {len(valid_paths)} tracks...")
-            subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, check=True)
+            subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, check=True, timeout=180)
 
             if os.path.exists(full_path) and os.path.getsize(full_path) > 0:
                 file_size = os.path.getsize(full_path)
@@ -220,6 +221,8 @@ def concatenate_tracks(file_paths, crossfade_ms=0):
                     'file_size': file_size,
                     'format': 'mp3',
                 }
+        except subprocess.CalledProcessError as e:
+            logger.warning(f"FFmpeg concat demuxer error (code {e.returncode}): {e.stderr or e.stdout}")
         except Exception as e:
             logger.warning(f"FFmpeg concat demuxer failed, falling back to pydub concat: {e}")
         finally:
@@ -229,19 +232,18 @@ def concatenate_tracks(file_paths, crossfade_ms=0):
                 except Exception:
                     pass
 
-    # Fallback / Crossfade Pydub Path
+    # Fallback / Crossfade Pydub Path (Memory-safe streaming)
     logger.info(f"Concatenating {len(valid_paths)} tracks with pydub (crossfade={crossfade_ms}ms)...")
-    segments = []
-    for vp in valid_paths:
+    ext0 = os.path.splitext(valid_paths[0])[1].replace('.', '').lower() or 'mp3'
+    result = AudioSegment.from_file(valid_paths[0], format=ext0)
+    for vp in valid_paths[1:]:
         ext = os.path.splitext(vp)[1].replace('.', '').lower() or 'mp3'
-        segments.append(AudioSegment.from_file(vp, format=ext))
-
-    result = segments[0]
-    for seg in segments[1:]:
+        seg = AudioSegment.from_file(vp, format=ext)
         if crossfade_ms > 0 and crossfade_ms < min(len(result), len(seg)):
             result = result.append(seg, crossfade=crossfade_ms)
         else:
             result = result + seg
+        del seg
 
     result.export(full_path, format='mp3', bitrate=bitrate)
     duration = len(result) / 1000.0

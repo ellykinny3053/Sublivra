@@ -445,12 +445,12 @@ class PlaylistMaker {
       btn.disabled = true;
       btn.innerHTML = `
         <span style="display:inline-block; width:13px; height:13px; border:2px solid #ffffff; border-top-color:transparent; border-radius:50%; animation:spin 0.8s linear infinite; margin-right:6px; vertical-align:middle;"></span>
-        Merging Track...
+        Merging Sequence...
       `;
     }
 
     try {
-      window.toast.show('Merging playlist tracks into continuous audio file. Please wait...', 'info', 7000);
+      window.toast.show('Preparing and merging playlist audio tracks. Large sequences may take 30–60 seconds...', 'info', 25000);
       const response = await window.api.get(`/bundles/playlists/${playlistId}/export/`);
       let data = null;
       try {
@@ -459,10 +459,10 @@ class PlaylistMaker {
         data = null;
       }
 
-      if (response.ok && data) {
+      if (response && response.ok && data) {
         if (data.skipped_tracks && data.skipped_tracks.length > 0) {
           window.toast.show(
-            `Continuous track exported! (${data.skipped_tracks.length} unavailable track skipped: ${data.skipped_tracks.join(', ')})`,
+            `Continuous track exported! (${data.skipped_tracks.length} unavailable tracks skipped: ${data.skipped_tracks.join(', ')})`,
             'warning',
             9000
           );
@@ -473,12 +473,12 @@ class PlaylistMaker {
         if (window.player?.playTrack) window.player.playTrack(data);
         if (window.trackEvent) window.trackEvent('playlist_exported', { title: data.title });
       } else {
-        const errorMsg = data?.error || data?.detail || data?.message || (response.status === 401 ? 'Please sign in to export playlist' : 'Export failed');
-        window.toast.show(errorMsg, 'error', 6000);
+        const errorMsg = data?.error || data?.detail || data?.message || (response?.status === 401 ? 'Please sign in to export playlist' : 'Export failed. Please retry.');
+        window.toast.show(errorMsg, 'error', 8000);
       }
     } catch (err) {
       console.error('Export playlist audio error:', err);
-      window.toast.show('Error exporting playlist audio. Please check connection.', 'error');
+      window.toast.show('Export timed out or connection dropped. Healed tracks have been cached — please click Export again to finish.', 'warning', 10000);
     } finally {
       if (btn) {
         btn.disabled = false;
