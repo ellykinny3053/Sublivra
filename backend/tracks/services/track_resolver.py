@@ -1,9 +1,6 @@
-"""
-Service for resolving and self-healing track audio file paths across environments.
-Handles cross-platform paths, Railway ephemeral storage recovery, and graceful skipping of dead/unavailable tracks.
-"""
 import os
 import time
+import shutil
 import logging
 from django.conf import settings
 from tracks.models import Track
@@ -14,8 +11,7 @@ logger = logging.getLogger(__name__)
 def resolve_track_file_path(track, auto_heal=True):
     """
     Given a Track instance, resolve its physical file path on disk.
-    If the file is missing (e.g. wiped due to Railway container restart/redeploy),
-    automatically self-heal by re-downloading from YouTube or re-generating TTS if possible.
+    Supports local storage, S3/R2 remote storage, and auto-healing from YouTube / TTS.
 
     Returns:
         str: Absolute path to the valid audio file on disk.
@@ -29,6 +25,7 @@ def resolve_track_file_path(track, auto_heal=True):
     file_name = track.file.name if hasattr(track.file, 'name') else str(track.file or '')
     clean_name = file_name.replace('\\', '/').lstrip('/')
 
+    # 1. Check local candidates on disk
     candidates = []
     if clean_name:
         candidates.append(os.path.join(settings.MEDIA_ROOT, clean_name))
@@ -48,18 +45,40 @@ def resolve_track_file_path(track, auto_heal=True):
         if os.path.isabs(clean_name):
             candidates.append(clean_name)
 
-    # Check candidate paths on disk
     for candidate in candidates:
-        if candidate and os.path.isfile(candidate):
+        if candidate and os.path.isfile(candidate) and os.path.getsize(candidate) > 0:
             return candidate
 
-    # Self-healing if missing on disk
+    # 2. Check remote storage (S3 / R2 / Cloud Storage)
+    if hasattr(track, 'file') and track.file:
+        try:
+            if hasattr(track.file, 'storage') and track.file.name:
+                if track.file.storage.exists(track.file.name):
+                    local_dest = os.path.join(settings.MEDIA_ROOT, clean_name)
+                    os.makedirs(os.path.dirname(local_dest), exist_ok=True)
+                    if not os.path.isfile(local_dest) or os.path.getsize(local_dest) == 0:
+                        logger.info(f"Caching track {track.id} from remote storage to {local_dest}")
+                        with track.file.open('rb') as src, open(local_dest, 'wb') as dst:
+                            shutil.copyfileobj(src, dst)
+                    if os.path.isfile(local_dest) and os.path.getsize(local_dest) > 0:
+                        return local_dest
+        except Exception as e:
+            logger.debug(f"Storage backend check for track {track.id}: {e}")
+
+    # 3. Self-healing if missing on disk
     if auto_heal:
-        source_url = track.source_url
+        source_url = getattr(track, 'source_url', '') or ''
         if not source_url:
-            yt_imp = getattr(track, 'youtube_import', None)
-            if yt_imp and hasattr(yt_imp, 'youtube_url'):
-                source_url = yt_imp.youtube_url
+            try:
+                from tracks.models import YouTubeImport
+                yt_imp = YouTubeImport.objects.filter(track_id=track.id).first()
+                if yt_imp:
+                    source_url = yt_imp.youtube_url or (f"https://www.youtube.com/watch?v={yt_imp.video_id}" if yt_imp.video_id else '')
+            except Exception as e:
+                logger.warning(f"YouTubeImport lookup failed for track {track.id}: {e}")
+
+        if source_url and not source_url.startswith('http'):
+            source_url = f"https://www.youtube.com/watch?v={source_url.strip()}"
 
         is_youtube = (
             track.source_type == Track.SourceType.YOUTUBE_AUTHORIZED
@@ -67,7 +86,7 @@ def resolve_track_file_path(track, auto_heal=True):
         )
 
         if source_url and is_youtube:
-            logger.info(f"Self-healing: Re-downloading missing YouTube audio for track '{track.title}' (ID {track.id})")
+            logger.info(f"Self-healing: Re-downloading missing YouTube audio for track '{track.title}' (ID {track.id}) from {source_url}")
             try:
                 from tracks.services import youtube_service
                 res = youtube_service.download_audio(source_url)
@@ -82,7 +101,7 @@ def resolve_track_file_path(track, auto_heal=True):
                     os.path.join(settings.MEDIA_ROOT, 'audio', 'youtube', os.path.basename(new_file))
                 ]
                 for cp in check_paths:
-                    if os.path.isfile(cp):
+                    if os.path.isfile(cp) and os.path.getsize(cp) > 0:
                         return cp
             except Exception as e:
                 logger.warning(f"Failed to auto-heal YouTube track '{track.title}' (ID {track.id}): {e}")
@@ -101,7 +120,7 @@ def resolve_track_file_path(track, auto_heal=True):
                 track.save(update_fields=['file'])
 
                 check_path = os.path.join(settings.MEDIA_ROOT, new_file)
-                if os.path.isfile(check_path):
+                if os.path.isfile(check_path) and os.path.getsize(check_path) > 0:
                     return check_path
             except Exception as e:
                 logger.warning(f"Failed to auto-heal TTS track '{track.title}' (ID {track.id}): {e}")
@@ -113,7 +132,7 @@ def resolve_track_file_path(track, auto_heal=True):
 def resolve_tracks_files(tracks, auto_heal=True, allow_skip=True, max_workers=5):
     """
     Resolve and self-heal a list of tracks in sequence.
-    Uses concurrent ThreadPoolExecutor for missing files so 10+ tracks heal in parallel
+    Uses concurrent ThreadPoolExecutor for missing files so multiple tracks heal in parallel
     (30-45s) instead of sequentially blocking for minutes and timing out.
 
     Args:
@@ -137,7 +156,7 @@ def resolve_tracks_files(tracks, auto_heal=True, allow_skip=True, max_workers=5)
     for t in tracks:
         try:
             path = resolve_track_file_path(t, auto_heal=False)
-            if path and os.path.isfile(path):
+            if path and os.path.isfile(path) and os.path.getsize(path) > 0:
                 path_map[t.id] = path
                 continue
         except FileNotFoundError:
@@ -149,18 +168,25 @@ def resolve_tracks_files(tracks, auto_heal=True, allow_skip=True, max_workers=5)
         logger.info(f"Auto-healing {len(missing_tracks)} missing audio tracks concurrently (workers={max_workers})...")
         from concurrent.futures import ThreadPoolExecutor, as_completed
 
-        def heal_single_track(track):
+        def heal_single_track(track_id):
+            from django.db import close_old_connections
+            close_old_connections()
             try:
-                path = resolve_track_file_path(track, auto_heal=True)
-                if path and os.path.isfile(path):
-                    return track.id, path, None
-                return track.id, None, "File not found after healing"
+                from tracks.models import Track
+                t = Track.objects.get(id=track_id)
+                path = resolve_track_file_path(t, auto_heal=True)
+                if path and os.path.isfile(path) and os.path.getsize(path) > 0:
+                    return track_id, path, None
+                return track_id, None, "File not found after healing"
             except Exception as e:
-                return track.id, None, str(e)
+                logger.warning(f"Auto-heal failed for track ID {track_id}: {e}")
+                return track_id, None, str(e)
+            finally:
+                close_old_connections()
 
         workers = min(len(missing_tracks), max_workers)
         with ThreadPoolExecutor(max_workers=workers) as executor:
-            future_to_track = {executor.submit(heal_single_track, t): t for t in missing_tracks}
+            future_to_track = {executor.submit(heal_single_track, t.id): t for t in missing_tracks}
             for future in as_completed(future_to_track):
                 t = future_to_track[future]
                 try:
@@ -187,4 +213,5 @@ def resolve_tracks_files(tracks, auto_heal=True, allow_skip=True, max_workers=5)
                 raise FileNotFoundError(f"Missing audio for track '{title}' and could not be recovered.")
 
     return valid_items, skipped_tracks
+
 

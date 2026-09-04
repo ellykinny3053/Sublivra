@@ -417,8 +417,9 @@ class PlaylistExportView(APIView):
             )
 
         if not resolved_paths:
+            details = f"Skipped tracks: {', '.join(skipped_tracks[:5])}" if skipped_tracks else "No audio files found on server."
             return Response(
-                {'error': 'None of the tracks in this playlist could be retrieved. The source videos may have been removed or made private on YouTube.'},
+                {'error': f"Could not retrieve audio files for this playlist ({details}). Please ensure source videos are public and available."},
                 status=status.HTTP_400_BAD_REQUEST
             )
 
