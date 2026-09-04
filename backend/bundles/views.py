@@ -171,8 +171,8 @@ class BundleExportView(APIView):
             return Response({'error': 'No valid tracks found in bundle.'}, status=status.HTTP_400_BAD_REQUEST)
 
         try:
-            resolved_paths = resolve_tracks_files(tracks, max_workers=4, auto_heal=True)
-            path_map = {t.id: p for t, p in zip(tracks, resolved_paths)}
+            valid_items, skipped_tracks = resolve_tracks_files(tracks, auto_heal=True, allow_skip=True)
+            path_map = {t.id: p for t, p in valid_items}
         except Exception as e:
             return Response({'error': f"Failed to prepare audio files: {str(e)}"}, status=status.HTTP_400_BAD_REQUEST)
 
@@ -406,12 +406,19 @@ class PlaylistExportView(APIView):
                 status=status.HTTP_400_BAD_REQUEST
             )
 
-        # Self-heal and resolve all audio files (re-downloads missing ephemeral YouTube/TTS files in parallel)
+        # Self-heal and resolve audio files, gracefully skipping any dead/unavailable YouTube videos
         try:
-            resolved_paths = resolve_tracks_files(tracks, max_workers=4, auto_heal=True)
+            valid_items, skipped_tracks = resolve_tracks_files(tracks, auto_heal=True, allow_skip=True)
+            resolved_paths = [p for _, p in valid_items]
         except Exception as e:
             return Response(
                 {'error': f"Failed to prepare audio files: {str(e)}"},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        if not resolved_paths:
+            return Response(
+                {'error': 'None of the tracks in this playlist could be retrieved. The source videos may have been removed or made private on YouTube.'},
                 status=status.HTTP_400_BAD_REQUEST
             )
 
@@ -438,7 +445,12 @@ class PlaylistExportView(APIView):
             rights_confirmed=True,
         )
 
+        response_data = TrackDetailSerializer(export_track).data
+        if skipped_tracks:
+            response_data['skipped_tracks'] = skipped_tracks
+            response_data['notice'] = f"Exported {len(resolved_paths)} tracks. Skipped {len(skipped_tracks)} unavailable track(s): {', '.join(skipped_tracks)}"
+
         return Response(
-            TrackDetailSerializer(export_track).data,
+            response_data,
             status=status.HTTP_201_CREATED
         )

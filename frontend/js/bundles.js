@@ -460,7 +460,15 @@ class PlaylistMaker {
       }
 
       if (response.ok && data) {
-        window.toast.show('Continuous playlist track exported and saved to library!', 'success');
+        if (data.skipped_tracks && data.skipped_tracks.length > 0) {
+          window.toast.show(
+            `Continuous track exported! (${data.skipped_tracks.length} unavailable track skipped: ${data.skipped_tracks.join(', ')})`,
+            'warning',
+            9000
+          );
+        } else {
+          window.toast.show('Continuous playlist track exported and saved to library!', 'success');
+        }
         if (window.library?.loadTracks) await window.library.loadTracks();
         if (window.player?.playTrack) window.player.playTrack(data);
         if (window.trackEvent) window.trackEvent('playlist_exported', { title: data.title });

@@ -1,10 +1,10 @@
 """
 Service for resolving and self-healing track audio file paths across environments.
-Handles cross-platform paths, Railway ephemeral storage recovery, and parallel resolution.
+Handles cross-platform paths, Railway ephemeral storage recovery, and graceful skipping of dead/unavailable tracks.
 """
 import os
+import time
 import logging
-from concurrent.futures import ThreadPoolExecutor, as_completed
 from django.conf import settings
 from tracks.models import Track
 
@@ -44,7 +44,7 @@ def resolve_track_file_path(track, auto_heal=True):
         if os.path.isabs(clean_name):
             candidates.append(clean_name)
 
-    # Check candidates
+    # Check candidate paths on disk
     for candidate in candidates:
         if candidate and os.path.isfile(candidate):
             return candidate
@@ -68,7 +68,7 @@ def resolve_track_file_path(track, auto_heal=True):
                     if os.path.isfile(cp):
                         return cp
             except Exception as e:
-                logger.error(f"Failed to auto-heal YouTube track '{track.title}': {e}")
+                logger.warning(f"Failed to auto-heal YouTube track '{track.title}' (ID {track.id}): {e}")
                 raise FileNotFoundError(f"Missing audio for track '{track.title}' and could not re-download: {str(e)}")
 
         elif track.source_type == Track.SourceType.TTS and track.tts_text:
@@ -87,51 +87,63 @@ def resolve_track_file_path(track, auto_heal=True):
                 if os.path.isfile(check_path):
                     return check_path
             except Exception as e:
-                logger.error(f"Failed to auto-heal TTS track '{track.title}': {e}")
+                logger.warning(f"Failed to auto-heal TTS track '{track.title}' (ID {track.id}): {e}")
                 raise FileNotFoundError(f"Missing audio for track '{track.title}' and could not re-generate: {str(e)}")
 
     raise FileNotFoundError(f"Audio file for track '{track.title}' (ID {track.id}) not found on server.")
 
 
-def resolve_tracks_files(tracks, max_workers=4, auto_heal=True):
+def resolve_tracks_files(tracks, auto_heal=True, allow_skip=True):
     """
-    Resolve and self-heal a list of tracks in order, downloading missing tracks in parallel.
-    Maintains the exact original track sequence ordering in the returned list of file paths.
+    Resolve and self-heal a list of tracks in sequence.
+    If an individual track cannot be recovered (e.g. YouTube video was removed/private),
+    allow_skip=True records it in skipped_tracks rather than aborting the entire export.
 
     Args:
         tracks: List of Track model instances.
-        max_workers: Maximum threads for concurrent downloads.
-        auto_heal: Whether to re-download/re-generate missing files.
+        auto_heal: Whether to re-download missing files.
+        allow_skip: Whether to skip dead/unavailable tracks gracefully.
 
     Returns:
-        list[str]: Absolute file paths in the exact order of `tracks`.
+        tuple[list[tuple[Track, str]], list[str]]:
+            - valid_items: list of (track, absolute_file_path)
+            - skipped_tracks: list of track title strings that were unrecoverable
     """
     if not tracks:
-        return []
+        return [], []
 
-    results = {}
-    missing_items = []
+    valid_items = []
+    skipped_tracks = []
 
-    # First pass: check what's already on disk synchronously (fast, 0ms)
-    for idx, t in enumerate(tracks):
+    for t in tracks:
+        # 1. Fast check: is file already on disk?
         try:
             path = resolve_track_file_path(t, auto_heal=False)
-            results[idx] = path
+            if path and os.path.isfile(path):
+                valid_items.append((t, path))
+                continue
         except FileNotFoundError:
-            missing_items.append((idx, t))
+            pass
 
-    # Second pass: download missing tracks concurrently
-    if missing_items and auto_heal:
-        logger.info(f"Resolving {len(missing_items)} missing track files concurrently (workers={max_workers})...")
-        worker_count = min(max_workers, len(missing_items))
-        with ThreadPoolExecutor(max_workers=worker_count) as executor:
-            future_to_idx = {
-                executor.submit(resolve_track_file_path, t, True): idx
-                for idx, t in missing_items
-            }
-            for future in as_completed(future_to_idx):
-                idx = future_to_idx[future]
-                path = future.result()  # Will raise if download failed
-                results[idx] = path
+        # 2. Re-download / regenerate if auto_heal enabled
+        if auto_heal:
+            try:
+                path = resolve_track_file_path(t, auto_heal=True)
+                if path and os.path.isfile(path):
+                    valid_items.append((t, path))
+                    # Brief pause between YouTube downloads to avoid cloud IP rate limiting
+                    if t.source_type == Track.SourceType.YOUTUBE_AUTHORIZED:
+                        time.sleep(0.3)
+                    continue
+            except Exception as e:
+                logger.warning(f"Track '{t.title}' could not be resolved: {e}")
 
-    return [results[i] for i in range(len(tracks))]
+        # 3. Track could not be found or downloaded
+        title = t.title or f"Track {t.id}"
+        if allow_skip:
+            skipped_tracks.append(title)
+            logger.info(f"Skipping unrecoverable track '{title}' for export.")
+        else:
+            raise FileNotFoundError(f"Missing audio for track '{title}' and could not be recovered.")
+
+    return valid_items, skipped_tracks

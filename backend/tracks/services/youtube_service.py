@@ -89,14 +89,9 @@ def _get_base_ydl_opts(extra_opts=None):
         'geo_bypass': True,
         'extractor_args': {
             'youtube': {
-                'player_client': ['android', 'ios', 'mweb', 'web_creator', 'web'],
+                'player_client': ['ios', 'android', 'mweb'],
             }
         },
-        'http_headers': {
-            'User-Agent': 'com.google.android.youtube/19.29.37 (Linux; U; Android 11) gzip',
-            'Accept': '*/*',
-            'Accept-Language': 'en-US,en;q=0.9',
-        }
     }
 
     # Optional cookies authentication via environment variable
